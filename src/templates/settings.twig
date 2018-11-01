@@ -1,0 +1,113 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Global Snippets plugin for Craft CMS 3.x
+ *
+ * Global Snippets settings.twig
+ *
+ * @author    Kurious Agency
+ * @copyright Copyright (c) 2018 Kurious Agency
+ * @link      https://kurious.agency
+ * @package   GlobalSnippets
+ * @since     1.0.0
+ */
+#}
+{% extends '_layouts/cp' %}
+{% import "_includes/forms" as forms %}
+{% set selectedSubnavItem = 'settings' %}
+{% set title = "Global Snippets | Settings" %}
+{% set currentGroup = craft.request.lastSegment %}
+{% if currentGroup == 'settings' %}
+    {% set selectedSidebarNavItem = 'all' %}
+{% else %}
+    {% set selectedSidebarNavItem = currentGroup %}
+{% endif %}
+
+{% do view.registerAssetBundle("kuriousagency\\globalsnippets\\assetbundles\\snippetscpsection\\SnippetsCPSectionAsset") %}
+
+{% block actionButton %}
+    {% if currentUser.admin %}
+        <div class="buttons">
+            <a href="{{ url('global-snippets/settings/snippet/new') }}" class="btn submit add icon">New snippet</a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+
+
+
+{% block sidebar %}
+    <h2>Groups</h2>
+    <div id="groups">
+        {# {% include "_includes/nav" with { items: sidebarNavItems, selectedItem: selectedSidebarNavItem } only %} #}
+        <nav>
+            <ul id="groups">
+                <li><a href="{{ url('global-snippets/settings') }}"{% if selectedSidebarNavItem == 'all' %} class="sel"{% endif %}>All</a></li>
+                {% for group in groups %}
+                    <li><a href="{{ url('global-snippets/settings/'~group|lower) }}"{% if selectedSidebarNavItem == group|lower %} class="sel"{% endif %} data-id="{{ group|lower }}">{{ group }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+    <div class="buttons">
+        <div id="newgroupbtn" class="btn add icon">{{ "New group"|t('app') }}</div>
+
+        {% if currentGroup != 'settings' %}
+            <div id="groupsettingsbtn" class="btn settings icon menubtn" title="{{ 'Settings' }}"></div>
+            <div class="menu">
+                <ul>
+                    <li><a data-action="rename" role="button">{{ "Rename selected group"|t('app') }}</a></li>
+                    <li><a data-action="delete" role="button">{{ "Delete selected group"|t('app') }}</a></li>
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h2>Global Snippet Settings</h2>
+    <div id="no-snippets"{% if snippets|length %} class="hidden"{% endif %}>
+        <p>No snippets exist yet.</p>
+    </div>
+    {% if snippets|length %}
+        <table id="snippet-table" class="data fullwidth collapsible">
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Content</th>
+                <th scope="col">Group</th>
+                <th scope="col">Handle</th>
+                <td class="thin"></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for snippet in snippets %}
+                <tr data-id="{{ snippet.id }}" data-name="{{ snippet.handle }}">
+                    <th scope="row" data-title="handle">
+                        {# {% if email.enabled %}
+                            <div class="status enabled"></div>
+                        {% else %}
+                            <div class="status"></div>
+                        {% endif %} #}
+                        <a href="{{ url('global-snippets/settings/snippet/'~snippet.id) }}">{{ snippet.name }}</a>
+                    </th>
+                    <td data-title="Content">{{ snippet.content }}</td>
+                    <td data-title="Group">{{ snippet.snippetGroup }}</td>
+                    <td data-title="Handle">{{ snippet.handle }}</td>
+                    <td class="thin"><a class="delete icon"
+                                        title="{{ 'Delete'|t('commerce') }}"
+                                        role="button"></a></td>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
+{% js %}
+    var adminTable = new Craft.AdminTable({
+      tableSelector: '#snippet-table',
+      deleteAction: 'global-snippets/snippets/delete',
+      sortable: true,
+    });
+{% endjs %} 

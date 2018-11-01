@@ -1,0 +1,56 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Global Snippets plugin for Craft CMS 3.x
+ *
+ * Global Snippets index.twig
+ *
+ * @author    Kurious Agency
+ * @copyright Copyright (c) 2018 Kurious Agency
+ * @link      https://kurious.agency
+ * @package   GlobalSnippets
+ * @since     1.0.0
+ */
+#}
+{% extends '_layouts/cp' %}
+{% import "_includes/forms" as forms %}
+{% set selectedSubnavItem = 'snippets' %}
+{% set title = "Global Snippets | INDEX" %}
+
+{% block content %}
+    <h2>Edit Site Global Snippets</h2>
+    <div id="fields">
+        {% for snippet in snippets %}
+            <form method="POST">
+                {{ csrfInput() }}
+                {{ redirectInput('global-snippets') }}
+                {{ forms.hidden({
+                name: 'action',
+                value: 'global-snippets/snippets/save' })
+                }}
+                <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
+                    <div class="heading">
+                        <label id="{{ snippet.handle }}"  for="{{ snippet.handle }}">{{ snippet.name }}</label>
+                        <div class="instructions">{{ snippet.instruction }}</div>
+                    </div>
+                    {{ forms.textArea({
+                        id: snippet.handle,
+                        name: 'content',
+                        instructions: snippet.instruction,
+                        value: snippet.content ?? '',
+                        require: true, })
+                    }}
+                    {# ID -HIDDEN #}
+                    {{ forms.hidden({
+                        id: 'snippetId',
+                        name: 'snippetId',
+                        value: snippet.id ?? '' })
+                    }}
+                </div>
+                <div class="buttons">
+                    <input type="submit" value="Save" class="btn submit add icon">
+                </div>
+            </form>
+        {% endfor %}
+    </div>
+{% endblock %}

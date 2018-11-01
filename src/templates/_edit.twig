@@ -1,0 +1,120 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Global Snippets plugin for Craft CMS 3.x
+ *
+ * Global Snippets _edit.twig
+ *
+ * @author    Kurious Agency
+ * @copyright Copyright (c) 2018 Kurious Agency
+ * @link      https://kurious.agency
+ * @package   GlobalSnippets
+ * @since     1.0.0
+ */
+#}
+{% extends '_layouts/cp' %}
+{% import "_includes/forms" as forms %}
+{% set selectedSubnavItem = 'settings' %}
+{% set title = "Global Snippets | Settings | " ~ snippet.name ?? 'Add New' %}
+{% set options = [] %}
+{% for group in groups %}
+    {% set options = options|merge([{ label: group|title, value: group|lower }]) %} 
+{% endfor %}
+{% set options = options|merge([{ label: "New Group", value: "new" }]) %}
+
+{% block content %}
+    <h2>{{ snippet.name|length ? 'Edit ' ~ snippet.name : 'Add New'}}</h2>
+    <form method="POST">
+    {{ csrfInput() }}
+    {{ redirectInput('global-snippets/settings') }}
+    {{ forms.hidden({
+    name: 'action',
+    value: 'global-snippets/snippets/save' })
+    }}
+    {#  ID -HIDDEN #}
+    {{ forms.hidden({
+    label: 'Snippet ID',
+    id: 'snippetId',
+    name: 'snippetId',
+    value: snippet.id ?? '' })
+    }}
+    {# NAME #}
+    {{ forms.textField({
+    label: 'Name',
+    instructions: 'Add/Edit snippet name',
+    id: 'name',
+    name: 'name',
+    value: snippet.name ?? '',
+    require: true, })
+    }}
+    {# HANDLE #}
+    {{ forms.textField({
+    label: 'Snippet Handle',
+    instructions: 'How it is referenced in templates',
+    id: 'handle',
+    name: 'handle',
+    value: snippet.handle ?? '',
+    require: true, })
+    }}
+    {# SNIPPET GROUP #}
+    <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
+        <div class="heading">
+            <label for="content">Snippet Group</label>
+            <div class="instructions">Select a Snippet GRoup or create a new one?</div>
+        </div>
+    <div class="flex">
+            <div>
+                {{ forms.select({
+                    id: 'snippetGroup',
+                    name: 'snippetGroup',
+                    options: options,
+                    value: snippet.snippetGroup|length ? snippet.snippetGroup : groups[0]|lower ,
+                    toggle: true,
+                    targetPrefix: 'new-group-',
+                    required: true
+                }) }}
+            </div>
+            {# <div id="new_group-new"
+                 class="flex-grow hidden">
+                {{ forms.text({
+                    id: 'new-group',
+                    name: 'new-group',
+                    value: '',
+                }) }}
+            </div> #}
+        </div>
+    {# {{ forms.select({
+        id: 'snippetGroup',
+        name: 'snippetGroup',
+        options: options,
+        value: snippet.snippetGroup|length ? snippet.snippetGroup : groups[0] ,,
+        toggle: true,
+        required: true
+    }) }} #}
+    </div>
+    {# Custom Instructions #}
+    {{ forms.textField({
+    label: 'Instruction',
+    instructions: 'Enter user instructions',
+    id: 'instruction',
+    name: 'instruction',
+    value: snippet.instruction })
+    }}
+    <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
+        <div class="heading">
+            <label for="content">Content</label>
+            <div class="instructions">Enter default content</div>
+        </div>
+        {{ forms.textArea({
+            id: 'content',
+            name: 'content',
+            value: snippet.content ?? '',
+            require: true, })
+        }}
+    </div>
+
+        <div class="buttons">
+        <input type="submit" value="Save" class="btn submit add icon">
+    </div>
+</form>
+{% endblock %}
