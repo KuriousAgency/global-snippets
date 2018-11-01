@@ -56,7 +56,7 @@
                 Craft.postActionRequest('global-snippets/snippets/save-group', data, $.proxy(function(response, textStatus) {
                     if (textStatus === 'success') {
                         if (response.success) {
-                            location.href = Craft.getUrl('settings/' + response.group.id);
+                            location.href = Craft.getUrl('global-snippets/settings/' + response.group.handle);
                         } else if (response.errors) {
                             var errors = this.flattenErrors(response.errors);
                             alert(Craft.t('app', 'Could not create the group:') + "\n\n" + errors.join("\n"));
@@ -98,6 +98,24 @@
 
         promptForGroupName: function(oldName) {
             return prompt(Craft.t('app', 'What do you want to name the group?'), oldName);
+        },
+
+        deleteSelectedGroup: function() {
+            if (confirm(Craft.t('app', 'Are you sure you want to delete this group and all its fields?'))) {
+                var data = {
+                    id: this.$selectedGroup.data('id')
+                };
+
+                Craft.postActionRequest('global-snippets/snippets/delete-snippet-group', data, $.proxy(function(response, textStatus) {
+                    if (textStatus === 'success') {
+                        if (response.success) {
+                            location.href = Craft.getUrl('global-snippets/settings/');
+                        } else {
+                            Craft.cp.displayError();
+                        }
+                    }
+                }, this));
+            }
         },
 
 

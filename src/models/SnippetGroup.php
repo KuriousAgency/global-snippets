@@ -20,7 +20,7 @@ use craft\base\Model;
  * @package   GlobalSnippets
  * @since     1.0.0
  */
-class Snippet extends Model
+class SnippetGroup extends Model
 {
     // Public Properties
     // =========================================================================
