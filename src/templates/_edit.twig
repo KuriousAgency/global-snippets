@@ -18,9 +18,8 @@
 {% set title = "Global Snippets | Settings | " ~ snippet.name ?? 'Add New' %}
 {% set options = [] %}
 {% for group in groups %}
-    {% set options = options|merge([{ label: group|title, value: group|lower }]) %} 
+    {% set options = options|merge([{ label: group.name|title, value: group.id|lower }]) %} 
 {% endfor %}
-{% set options = options|merge([{ label: "New Group", value: "new" }]) %}
 
 {% block content %}
     <h2>{{ snippet.name|length ? 'Edit ' ~ snippet.name : 'Add New'}}</h2>
@@ -68,7 +67,7 @@
                     id: 'snippetGroup',
                     name: 'snippetGroup',
                     options: options,
-                    value: snippet.snippetGroup|length ? snippet.snippetGroup : groups[0]|lower ,
+                    value: snippet.snippetGroup|length ? groups[snippet.snippetGroup].id ,
                     toggle: true,
                     targetPrefix: 'new-group-',
                     required: true

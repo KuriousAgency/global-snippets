@@ -118,6 +118,7 @@ class SnippetsController extends Controller
         $group = new SnippetGroup;
         $group->id = Craft::$app->getRequest()->getBodyParam('id');
         $group->name = Craft::$app->getRequest()->getBodyParam('name');
+        $group->handle = strtolower($group->name);
 
         $isNewGroup = empty($group->id);
 
@@ -134,5 +135,41 @@ class SnippetsController extends Controller
         return $this->asJson([
             'errors' => $group->getErrors(),
         ]);
+    }
+
+    public function actionDeleteSnippet($id = null)
+    {
+        $this->requireLogin();
+
+        if ($id == null){
+            $this->requirePostRequest();
+            $this->requireAcceptsJson();
+            $id = Craft::$app->getRequest()->getRequiredBodyParam('id');
+        }
+        if (GlobalSnippets::$plugin->snippets->deleteSnippetById($id)) {
+            Craft::$app->getSession()->setNotice('Snippet Deleted.');
+            //return $this->redirectToPostedUrl($email);
+        } else {
+            Craft::$app->getSession()->setError('Couldn’t delete snippet.');
+        }
+        return $this->asJson(['success' => true]);
+    }
+
+    public function actionDeleteSnippetGroup($id = null)
+    {
+        $this->requireLogin();
+
+
+        if ($id == null){
+            $this->requirePostRequest();
+            $this->requireAcceptsJson();
+            $id = Craft::$app->getRequest()->getRequiredBodyParam('id');
+        }
+        if (GlobalSnippets::$plugin->snippets->deleteSnippetGroupById($id)){
+            Craft::$app->getSession()->setNotice('Snippet Group Deleted.');
+        } else {
+            Craft::$app->getSession()->setError('Couldn\'t delete group.');
+        }
+        return $this->asJson(['success'=>true]);
     }
 }

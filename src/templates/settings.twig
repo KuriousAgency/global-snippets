@@ -44,7 +44,7 @@
             <ul id="groups">
                 <li><a href="{{ url('global-snippets/settings') }}"{% if selectedSidebarNavItem == 'all' %} class="sel"{% endif %}>All</a></li>
                 {% for group in groups %}
-                    <li><a href="{{ url('global-snippets/settings/'~group|lower) }}"{% if selectedSidebarNavItem == group|lower %} class="sel"{% endif %} data-id="{{ group|lower }}">{{ group }}</a></li>
+                    <li><a href="{{ url('global-snippets/settings/'~group.id) }}"{% if selectedSidebarNavItem == group.id %} class="sel"{% endif %} data-id="{{ group.id }}">{{ group.name }}</a></li>
                 {% endfor %}
             </ul>
         </nav>
@@ -74,7 +74,7 @@
             <thead>
             <tr>
                 <th scope="col">Name</th>
-                <th scope="col">Content</th>
+                {# <th scope="col">Content</th> #}
                 <th scope="col">Group</th>
                 <th scope="col">Handle</th>
                 <td class="thin"></td>
@@ -82,22 +82,24 @@
             </thead>
             <tbody>
             {% for snippet in snippets %}
-                <tr data-id="{{ snippet.id }}" data-name="{{ snippet.handle }}">
-                    <th scope="row" data-title="handle">
-                        {# {% if email.enabled %}
-                            <div class="status enabled"></div>
-                        {% else %}
-                            <div class="status"></div>
-                        {% endif %} #}
-                        <a href="{{ url('global-snippets/settings/snippet/'~snippet.id) }}">{{ snippet.name }}</a>
-                    </th>
-                    <td data-title="Content">{{ snippet.content }}</td>
-                    <td data-title="Group">{{ snippet.snippetGroup }}</td>
-                    <td data-title="Handle">{{ snippet.handle }}</td>
-                    <td class="thin"><a class="delete icon"
-                                        title="{{ 'Delete'|t('commerce') }}"
-                                        role="button"></a></td>
-                </tr>
+                {% if (snippet.snippetGroup == selectedSidebarNavItem)  or (selectedSidebarNavItem =='all') %}
+                    <tr data-id="{{ snippet.id }}" data-name="{{ snippet.handle }}">
+                        <th scope="row" data-title="handle">
+                            {# {% if email.enabled %}
+                                <div class="status enabled"></div>
+                            {% else %}
+                                <div class="status"></div>
+                            {% endif %} #}
+                            <a href="{{ url('global-snippets/settings/snippet/'~snippet.id) }}">{{ snippet.name }}</a>
+                        </th>
+                        {# <td data-title="Content">{{ snippet.content }}</td> #}
+                        <td data-title="Group">{{ groups[snippet.snippetGroup].name }}</td>
+                        <td data-title="Handle">{{ snippet.handle }}</td>
+                        <td class="thin"><a class="delete icon"
+                                            title="{{ 'Delete'|t('commerce') }}"
+                                            role="button"></a></td>
+                    </tr>
+                {% endif %}
             {% endfor %}
 
             </tbody>
@@ -107,7 +109,7 @@
 {% js %}
     var adminTable = new Craft.AdminTable({
       tableSelector: '#snippet-table',
-      deleteAction: 'global-snippets/snippets/delete',
+      deleteAction: 'global-snippets/snippets/delete-snippet',
       sortable: true,
     });
 {% endjs %} 
