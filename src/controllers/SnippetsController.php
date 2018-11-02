@@ -42,10 +42,11 @@ class SnippetsController extends Controller
     /**
      * @return mixed
      */
-    public function actionIndex(): Response
+    public function actionIndex($snippetGroup = null): Response
     {
         $variables = [];
         $variables['snippets'] = GlobalSnippets::$plugin->snippets->getAllSnippets();
+        $variables['groups'] = GlobalSnippets::$plugin->snippets->getAllSnippetGroups();
 
         return $this->renderTemplate('global-snippets/index', $variables);
     }
@@ -80,7 +81,7 @@ class SnippetsController extends Controller
         }
         // Shared attributes
         $snippet->name = $request->getBodyParam('name', $snippet->name);
-        $snippet->handle = $request->getBodyParam('name',$snippet->handle);
+        $snippet->handle = $request->getBodyParam('handle',$snippet->handle);
         $snippet->snippetGroup = $request->getBodyParam('snippetGroup', $snippet->snippetGroup);
         $snippet->instruction = $request->getBodyParam('instruction', $snippet->instruction);
         $snippet->content = $request->getBodyParam('content', $snippet->content);
@@ -93,6 +94,24 @@ class SnippetsController extends Controller
         }
         Craft::$app->getUrlManager()->setRouteParams(['snippet' => $snippet]);
         return $result;
+    }
+
+    public function actionSaveContent()
+    {
+        $this->requirePostRequest();
+        $request = Craft::$app->getRequest();
+        $fields = $request->getBodyParam('content');
+        // Craft::dd($fields);
+        foreach ($fields as $key => $value){
+            $snippet = GlobalSnippets::$plugin->snippets->getSnippetById($key);
+            $snippet->content = $value;
+            if (GlobalSnippets::$plugin->snippets->saveSnippet($snippet)) {
+                Craft::$app->getSession()->setNotice('Snippet saved.');
+            } else {
+                Craft::$app->getSession()->setError('Couldn’t save snippet.');
+            }
+        }
+        return $this->redirectToPostedUrl();
     }
 
     /**
