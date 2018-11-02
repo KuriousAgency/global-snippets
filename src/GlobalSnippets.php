@@ -75,8 +75,9 @@ class GlobalSnippets extends Plugin
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
                 $event->rules['global-snippets'] = 'global-snippets/snippets/index';
+                $event->rules['global-snippets/<snippetGroup:\d+>'] = 'global-snippets/snippets/index';
                 $event->rules['global-snippets/settings'] = 'global-snippets/snippets/settings';
-                $event->rules['global-snippets/settings/<snippetGroup:\w+>'] = 'global-snippets/snippets/settings';
+                $event->rules['global-snippets/settings/<snippetGroup:\d+>'] = 'global-snippets/snippets/settings';
                 $event->rules['global-snippets/settings/snippet/<id:\d+>'] = 'global-snippets/snippets/edit';
                 $event->rules['global-snippets/settings/snippet/new'] = 'global-snippets/snippets/edit';
             }

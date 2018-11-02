@@ -44,7 +44,7 @@
     id: 'name',
     name: 'name',
     value: snippet.name ?? '',
-    require: true, })
+    required: true, })
     }}
     {# HANDLE #}
     {{ forms.textField({
@@ -53,13 +53,13 @@
     id: 'handle',
     name: 'handle',
     value: snippet.handle ?? '',
-    require: true, })
+    required: true, })
     }}
     {# SNIPPET GROUP #}
     <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
         <div class="heading">
             <label for="content">Snippet Group</label>
-            <div class="instructions">Select a Snippet GRoup or create a new one?</div>
+            <div class="instructions">Select a Snippet Group or create a new one?</div>
         </div>
     <div class="flex">
             <div>
@@ -68,28 +68,10 @@
                     name: 'snippetGroup',
                     options: options,
                     value: snippet.snippetGroup|length ? groups[snippet.snippetGroup].id ,
-                    toggle: true,
-                    targetPrefix: 'new-group-',
                     required: true
                 }) }}
             </div>
-            {# <div id="new_group-new"
-                 class="flex-grow hidden">
-                {{ forms.text({
-                    id: 'new-group',
-                    name: 'new-group',
-                    value: '',
-                }) }}
-            </div> #}
         </div>
-    {# {{ forms.select({
-        id: 'snippetGroup',
-        name: 'snippetGroup',
-        options: options,
-        value: snippet.snippetGroup|length ? snippet.snippetGroup : groups[0] ,,
-        toggle: true,
-        required: true
-    }) }} #}
     </div>
     {# Custom Instructions #}
     {{ forms.textField({
@@ -97,7 +79,8 @@
     instructions: 'Enter user instructions',
     id: 'instruction',
     name: 'instruction',
-    value: snippet.instruction })
+    value: snippet.instruction,
+    required: true })
     }}
     <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
         <div class="heading">
@@ -117,3 +100,9 @@
     </div>
 </form>
 {% endblock %}
+
+{% if snippet is empty or snippet.handle is empty %}
+    {% js %}
+        new Craft.HandleGenerator('#name', '#handle');
+    {% endjs %}
+{% endif %}

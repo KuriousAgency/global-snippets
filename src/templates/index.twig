@@ -16,17 +16,48 @@
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'snippets' %}
 {% set title = "Global Snippets | INDEX" %}
+{% set currentGroup = craft.request.lastSegment %}
+{% if currentGroup == 'global-snippets' %}
+    {% set selectedSidebarNavItem = 'all' %}
+{% else %}
+    {% set selectedSidebarNavItem = currentGroup %}
+{% endif %}
+{% set fullPageForm = true %}
+
+{% block actionButton %}
+        <div class="buttons">
+            <input type="submit" value="Save" class="btn submit add icon">
+        </div>
+{% endblock %}
+
+{% block sidebar %}
+    <h2>Groups</h2>
+    <div id="groups">
+        {# {% include "_includes/nav" with { items: sidebarNavItems, selectedItem: selectedSidebarNavItem } only %} #}
+        <nav>
+            <ul id="groups">
+                <li><a href="{{ url('global-snippets/') }}"{% if selectedSidebarNavItem == 'all' %} class="sel"{% endif %}>All</a></li>
+                {% for group in groups %}
+                    <li><a href="{{ url('global-snippets/'~group.id) }}"{% if selectedSidebarNavItem == group.id %} class="sel"{% endif %} data-id="{{ group.id }}">{{ group.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+    
+{% endblock %}
 
 {% block content %}
     <h2>Edit Site Global Snippets</h2>
     <div id="fields">
+        {% set redirect = craft.request.getUrl %}
+        {{ csrfInput() }}
+        {{ redirectInput( redirect ) }}
         {% for snippet in snippets %}
-            <form method="POST">
-                {{ csrfInput() }}
-                {{ redirectInput('global-snippets') }}
+            {% if (snippet.snippetGroup == selectedSidebarNavItem)  or (selectedSidebarNavItem =='all') %}
+            {# <form method="POST"> #}
                 {{ forms.hidden({
                 name: 'action',
-                value: 'global-snippets/snippets/save' })
+                value: 'global-snippets/snippets/save-content' })
                 }}
                 <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
                     <div class="heading">
@@ -35,7 +66,7 @@
                     </div>
                     {{ forms.textArea({
                         id: snippet.handle,
-                        name: 'content',
+                        name: 'content['~snippet.id~']',
                         instructions: snippet.instruction,
                         value: snippet.content ?? '',
                         require: true, })
@@ -43,14 +74,15 @@
                     {# ID -HIDDEN #}
                     {{ forms.hidden({
                         id: 'snippetId',
-                        name: 'snippetId',
+                        name: 'snippetId['~snippet.id~']',
                         value: snippet.id ?? '' })
                     }}
                 </div>
-                <div class="buttons">
+                {# <div class="buttons">
                     <input type="submit" value="Save" class="btn submit add icon">
-                </div>
-            </form>
+                </div> #}
+            {# </form> #}
+            {% endif %}
         {% endfor %}
     </div>
 {% endblock %}
