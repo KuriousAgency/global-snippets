@@ -11,6 +11,7 @@
 namespace kuriousagency\globalsnippets\variables;
 
 use kuriousagency\globalsnippets\GlobalSnippets;
+use yii\di\ServiceLocator;
 
 use Craft;
 
@@ -19,7 +20,7 @@ use Craft;
  * @package   GlobalSnippets
  * @since     1.0.0
  */
-class GlobalSnippetsVariable
+class GlobalSnippetsVariable extends ServiceLocator
 {
     // Public Methods
     // =========================================================================
@@ -30,5 +31,25 @@ class GlobalSnippetsVariable
 		unset($components['migrator']);
         $config['components'] = $components;
         parent::__construct($config);
-	}
+    }
+    
+    /**
+     * Call {{ craft.globalSnippets.groups.[group].[snippet] }} to return
+     * the related snippet content.
+     */
+    public function groups()
+    {
+        $service = GlobalSnippets::$plugin->snippets;
+        $groups = $service->getAllSnippetGroups();
+        $return_array = [];
+        foreach ($groups as $group){
+            $snippets = $service->getSnippetsByGroup($group['id']);
+            $snippet_array = [];
+            foreach ($snippets as $snippet){
+                $snippet_array[$snippet['handle']] = $snippet['content'];
+            }
+            $return_array[$group['handle']] = $snippet_array;
+        }
+        return $return_array;
+    }
 }
