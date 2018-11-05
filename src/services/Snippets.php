@@ -46,6 +46,19 @@ class Snippets extends Component
 
         return $result ? new Snippet($result) : null;
     }
+        /**
+     * Get a snippet by its Handle.
+     *
+     * @param int $id
+     */
+    public function getSnippetByHandle($handle)
+    {
+        $result = $this->_createSnippetQuery()
+            ->where(['handle' => $handle])
+            ->one();
+
+        return $result ? new Snippet($result) : null;
+    }
     /**
      * Get all snipepts.
      *
