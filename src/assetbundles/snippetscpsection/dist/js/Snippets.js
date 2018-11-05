@@ -56,7 +56,7 @@
                 Craft.postActionRequest('global-snippets/snippets/save-group', data, $.proxy(function(response, textStatus) {
                     if (textStatus === 'success') {
                         if (response.success) {
-                            location.href = Craft.getUrl('global-snippets/settings/' + response.group.handle);
+                            location.href = Craft.getUrl('global-snippets/settings/' + response.group.id);
                         } else if (response.errors) {
                             var errors = this.flattenErrors(response.errors);
                             alert(Craft.t('app', 'Could not create the group:') + "\n\n" + errors.join("\n"));

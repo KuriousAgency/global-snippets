@@ -16,6 +16,7 @@ use kuriousagency\globalsnippets\models\SnippetGroup;
 
 use Craft;
 use craft\web\Controller;
+use craft\helpers\StringHelper;
 use yii\web\Response;
 
 /**
@@ -137,7 +138,7 @@ class SnippetsController extends Controller
         $group = new SnippetGroup;
         $group->id = Craft::$app->getRequest()->getBodyParam('id');
         $group->name = Craft::$app->getRequest()->getBodyParam('name');
-        $group->handle = strtolower($group->name);
+        $group->handle = StringHelper::toCamelCase($group->name);
 
         $isNewGroup = empty($group->id);
 
