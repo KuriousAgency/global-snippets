@@ -15,8 +15,8 @@
 {% extends '_layouts/cp' %}
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'settings' %}
-{% set title = "Global Snippets | Settings" %}
-{% set currentGroup = craft.request.lastSegment %}
+{% set title = "Settings" %}
+{% set currentGroup = craft.request.segments|last %}
 {% if currentGroup == 'settings' %}
     {% set selectedSidebarNavItem = 'all' %}
 {% else %}
@@ -32,6 +32,10 @@
         </div>
     {% endif %}
 {% endblock %}
+
+{% set crumbs = [
+    { label: "Global Snippets", url: url('global-snippets/') },
+] %}
 
 
 

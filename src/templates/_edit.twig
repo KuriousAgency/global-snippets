@@ -15,11 +15,15 @@
 {% extends '_layouts/cp' %}
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'settings' %}
-{% set title = "Global Snippets | Settings | " ~ snippet.name ?? 'Add New' %}
+{% set title = snippet.name|length ? snippet.name : 'Add New Snippet' %}
 {% set options = [] %}
 {% for group in groups %}
     {% set options = options|merge([{ label: group.name|title, value: group.id|lower }]) %} 
 {% endfor %}
+{% set crumbs = [
+    { label: "Global Snippets", url: url('global-snippets/') },
+    { label: "Settings", url: url('global-snippets/settings') }, 
+] %}
 
 {% block content %}
     <h2>{{ snippet.name|length ? 'Edit ' ~ snippet.name : 'Add New'}}</h2>

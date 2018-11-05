@@ -15,8 +15,8 @@
 {% extends '_layouts/cp' %}
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'snippets' %}
-{% set title = "Global Snippets | INDEX" %}
-{% set currentGroup = craft.request.lastSegment %}
+{% set title = "Global Snippets" %}
+{% set currentGroup = craft.request.segments|last %}
 {% if currentGroup == 'global-snippets' %}
     {% set selectedSidebarNavItem = 'all' %}
 {% else %}
