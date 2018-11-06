@@ -30,8 +30,15 @@ class GlobalSnippetsVariable extends ServiceLocator
 		$components = GlobalSnippets::$plugin->components;
 		unset($components['migrator']);
         $config['components'] = $components;
-        parent::__construct($config);
-    }
+		parent::__construct($config);
+	}
+	
+	public function __call($name, $args)
+	{
+		//GlobalSnippets::$plugin->snippets->getGroup($name)->snippets;
+		
+		return $this->groups()[$name];
+	}
     
     /**
      * Call {{ craft.globalSnippets.groups.[group].[snippet] }} to return
