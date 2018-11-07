@@ -31,7 +31,7 @@ class Snippet extends Model
     public $id = null;
     public $name = '';
     public $handle = '';
-    public $snippetGroup = '';
+    public $snippetGroupId = '';
     public $instruction = '';
     public $content = '';
 

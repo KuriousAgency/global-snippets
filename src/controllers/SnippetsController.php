@@ -43,10 +43,14 @@ class SnippetsController extends Controller
     /**
      * @return mixed
      */
-    public function actionIndex($snippetGroup = null): Response
+    public function actionIndex($snippetGroupId = null): Response
     {
         $variables = [];
-        $variables['snippets'] = GlobalSnippets::$plugin->snippets->getAllSnippets();
+        if ($snippetGroupId == null){
+            $variables['snippets'] = GlobalSnippets::$plugin->snippets->getAllSnippets();
+        } else {
+            $variables['snippets'] = GlobalSnippets::$plugin->snippets->getSnippetsByGroup($snippetGroupId);
+        }
         $variables['groups'] = GlobalSnippets::$plugin->snippets->getAllSnippetGroups();
 
         return $this->renderTemplate('global-snippets/index', $variables);
@@ -54,15 +58,16 @@ class SnippetsController extends Controller
     /**
      * @return mixed
      */
-    public function actionSettings($snippetGroup = null): Response
+    public function actionSettings($snippetGroupId = null): Response
     {
         $variables = [];
-        if ($snippetGroup == null){
+        if ($snippetGroupId == null){
             $variables['snippets'] = GlobalSnippets::$plugin->snippets->getAllSnippets();
         } else {
-            $variables['snippets'] = GlobalSnippets::$plugin->snippets->getSnippetsByGroup($snippetGroup);
+            $variables['snippets'] = GlobalSnippets::$plugin->snippets->getSnippetsByGroup($snippetGroupId);
         }
         $variables['groups'] = GlobalSnippets::$plugin->snippets->getAllSnippetGroups();
+        //Craft::dd($variables['groups']);
 
         return $this->renderTemplate('global-snippets/settings', $variables);
     }
@@ -83,18 +88,19 @@ class SnippetsController extends Controller
         // Shared attributes
         $snippet->name = $request->getBodyParam('name', $snippet->name);
         $snippet->handle = $request->getBodyParam('handle',$snippet->handle);
-        $snippet->snippetGroup = $request->getBodyParam('snippetGroup', $snippet->snippetGroup);
+        $snippet->snippetGroupId = $request->getBodyParam('snippetGroup', $snippet->snippetGroupId);
         $snippet->instruction = $request->getBodyParam('instruction', $snippet->instruction);
-        $snippet->content = $request->getBodyParam('content', $snippet->content);
+        $snippet->content = $request->getBodyParam('snippetContent', $snippet->content);
         // Save it
-        if (GlobalSnippets::$plugin->snippets->saveSnippet($snippet)) {
+        $response = GlobalSnippets::$plugin->snippets->saveSnippet($snippet);
+        //Craft::dd($response);
+        if ($response === true) {
             Craft::$app->getSession()->setNotice('Snippet saved.');
             return $this->redirectToPostedUrl($snippet);
         } else {
-            Craft::$app->getSession()->setError('Couldn’t save snippet.');
+            Craft::$app->getSession()->setError($response);
         }
-        Craft::$app->getUrlManager()->setRouteParams(['snippet' => $snippet]);
-        return $result;
+        return Craft::$app->getUrlManager()->setRouteParams(['snippet' => $snippet]);
     }
 
     public function actionSaveContent()
@@ -102,14 +108,14 @@ class SnippetsController extends Controller
         $this->requirePostRequest();
         $request = Craft::$app->getRequest();
         $fields = $request->getBodyParam('content');
-        // Craft::dd($fields);
         foreach ($fields as $key => $value){
             $snippet = GlobalSnippets::$plugin->snippets->getSnippetById($key);
             $snippet->content = $value;
-            if (GlobalSnippets::$plugin->snippets->saveSnippet($snippet)) {
+            $response = GlobalSnippets::$plugin->snippets->saveSnippet($snippet);
+            if ($response === true) {
                 Craft::$app->getSession()->setNotice('Snippet saved.');
             } else {
-                Craft::$app->getSession()->setError('Couldn’t save snippet.');
+                Craft::$app->getSession()->setError($response);
             }
         }
         return $this->redirectToPostedUrl();
@@ -141,8 +147,8 @@ class SnippetsController extends Controller
         $group->handle = StringHelper::toCamelCase($group->name);
 
         $isNewGroup = empty($group->id);
-
-        if (GlobalSnippets::$plugin->snippets->saveSnippetGroup($group)){
+        $response = GlobalSnippets::$plugin->snippets->saveSnippetGroup($group);
+        if ($response === true){
             if ($isNewGroup) {
                 Craft::$app->getSession()->setNotice('Group Added');
             }
@@ -150,8 +156,8 @@ class SnippetsController extends Controller
                 'success' => true,
                 'group' => $group->getAttributes(),
             ]);
-        }
-        
+        } 
+        $group->addError($response);
         return $this->asJson([
             'errors' => $group->getErrors(),
         ]);

@@ -32,31 +32,18 @@ class GlobalSnippetsVariable extends ServiceLocator
         $config['components'] = $components;
 		parent::__construct($config);
 	}
-	
-	public function __call($name, $args)
-	{
-		//GlobalSnippets::$plugin->snippets->getGroup($name)->snippets;
-		
-		return $this->groups()[$name];
-	}
-    
-    /**
-     * Call {{ craft.globalSnippets.groups.[group].[snippet] }} to return
-     * the related snippet content.
+	/**
+     * Provides the snippets to the templates in the format:
+     * 
+     * {{ craft.GlobalSnippets.[group handle].[snippet handle] }} 
      */
-    public function groups()
-    {
-        $service = GlobalSnippets::$plugin->snippets;
-        $groups = $service->getAllSnippetGroups();
-        $return_array = [];
-        foreach ($groups as $group){
-            $snippets = $service->getSnippetsByGroup($group['id']);
-            $snippet_array = [];
-            foreach ($snippets as $snippet){
-                $snippet_array[$snippet['handle']] = $snippet['content'];
-            }
-            $return_array[$group['handle']] = $snippet_array;
+	public function __call($handle, $args)
+	{
+        $snippets =  GlobalSnippets::$plugin->snippets->getSnippetGroup($handle)->getGroupSnippets();
+        $variables = [];
+        foreach ($snippets as $snippet){
+            $variables[$snippet->handle] = $snippet->content;
         }
-        return $return_array;
-    }
+        return $variables;
+	}
 }

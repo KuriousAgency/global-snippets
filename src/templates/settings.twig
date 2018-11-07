@@ -16,6 +16,7 @@
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'settings' %}
 {% set title = "Settings" %}
+
 {% set currentGroup = craft.request.segments|last %}
 {% if currentGroup == 'settings' %}
     {% set selectedSidebarNavItem = 'all' %}
@@ -33,17 +34,11 @@
     {% endif %}
 {% endblock %}
 
-{% set crumbs = [
-    { label: "Global Snippets", url: url('global-snippets/') },
-] %}
-
-
-
+{% set crumbs = [{ label: "Global Snippets", url: url('global-snippets/') },] %}
 
 {% block sidebar %}
     <h2>Groups</h2>
     <div id="groups">
-        {# {% include "_includes/nav" with { items: sidebarNavItems, selectedItem: selectedSidebarNavItem } only %} #}
         <nav>
             <ul id="groups">
                 <li><a href="{{ url('global-snippets/settings') }}"{% if selectedSidebarNavItem == 'all' %} class="sel"{% endif %}>All</a></li>
@@ -55,7 +50,6 @@
     </div>
     <div class="buttons">
         <div id="newgroupbtn" class="btn add icon">{{ "New group"|t('app') }}</div>
-
         {% if currentGroup != 'settings' %}
             <div id="groupsettingsbtn" class="btn settings icon menubtn" title="{{ 'Settings' }}"></div>
             <div class="menu">
@@ -76,40 +70,31 @@
     {% if snippets|length %}
         <table id="snippet-table" class="data fullwidth collapsible">
             <thead>
-            <tr>
-                <th scope="col">Name</th>
-                {# <th scope="col">Content</th> #}
-                <th scope="col">Group</th>
-                <th scope="col">Handle</th>
-                <td class="thin"></td>
-            </tr>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Group</th>
+                    <th scope="col">Handle</th>
+                    <td class="thin"></td>
+                </tr>
             </thead>
             <tbody>
             {% for snippet in snippets %}
-                {% if (snippet.snippetGroup == selectedSidebarNavItem)  or (selectedSidebarNavItem =='all') %}
+                {% if (snippet.snippetGroupId == selectedSidebarNavItem)  or (selectedSidebarNavItem =='all') %}
                     <tr data-id="{{ snippet.id }}" data-name="{{ snippet.handle }}">
                         <th scope="row" data-title="handle">
-                            {# {% if email.enabled %}
-                                <div class="status enabled"></div>
-                            {% else %}
-                                <div class="status"></div>
-                            {% endif %} #}
                             <a href="{{ url('global-snippets/settings/snippet/'~snippet.id) }}">{{ snippet.name }}</a>
                         </th>
-                        {# <td data-title="Content">{{ snippet.content }}</td> #}
-                        <td data-title="Group">{{ groups[snippet.snippetGroup].name }}</td>
+                        <td data-title="Group">{{ groups[snippet.snippetGroupId].name }}</td>
                         <td data-title="Handle">{{ snippet.handle }}</td>
-                        <td class="thin"><a class="delete icon"
-                                            title="{{ 'Delete'|t('commerce') }}"
-                                            role="button"></a></td>
+                        <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('commerce') }}" role="button"></a></td>
                     </tr>
                 {% endif %}
             {% endfor %}
-
             </tbody>
         </table>
     {% endif %}
 {% endblock %}
+
 {% js %}
     var adminTable = new Craft.AdminTable({
       tableSelector: '#snippet-table',

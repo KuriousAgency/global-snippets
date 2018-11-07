@@ -59,6 +59,7 @@
                             location.href = Craft.getUrl('global-snippets/settings/' + response.group.id);
                         } else if (response.errors) {
                             var errors = this.flattenErrors(response.errors);
+                            // console.log(errors);
                             alert(Craft.t('app', 'Could not create the group:') + "\n\n" + errors.join("\n"));
                         } else {
                             Craft.cp.displayError();
@@ -124,12 +125,14 @@
             var errors = [];
 
             for (var attribute in responseErrors) {
+
                 if (!responseErrors.hasOwnProperty(attribute)) {
                     continue;
                 }
-
-                errors = errors.concat(responseErrors[attribute]);
+                console.log(attribute);
+                errors = errors.concat(attribute);
             }
+
 
             return errors;
         }

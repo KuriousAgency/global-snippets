@@ -45,7 +45,7 @@ class SnippetGroup extends Model
             ['someAttribute', 'default', 'value' => 'Some Default'],
         ];
     }
-        /**
+    /**
      * Use the group name as the string representation.
      *
      * @return string
@@ -53,5 +53,14 @@ class SnippetGroup extends Model
     public function __toString(): string
     {
         return (string)$this->name;
+    }
+    /**
+     * Return all snippets in the group.
+     *
+     * @return array
+     */
+    public function getGroupSnippets(): array
+    {
+        return GlobalSnippets::$plugin->snippets->getSnippetsByGroup($this->id);
     }
 }
