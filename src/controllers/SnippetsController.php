@@ -41,6 +41,7 @@ class SnippetsController extends Controller
     // =========================================================================
 
     /**
+     * Load index page
      * @return mixed
      */
     public function actionIndex($snippetGroupId = null): Response
@@ -56,6 +57,7 @@ class SnippetsController extends Controller
         return $this->renderTemplate('global-snippets/index', $variables);
     }
     /**
+     * Load settings page
      * @return mixed
      */
     public function actionSettings($snippetGroupId = null): Response
@@ -73,6 +75,7 @@ class SnippetsController extends Controller
     }
 
     /**
+     * Save Snippet from the settings section
      * @return mixed
      */
     public function actionSave()
@@ -103,6 +106,10 @@ class SnippetsController extends Controller
         return Craft::$app->getUrlManager()->setRouteParams(['snippet' => $snippet]);
     }
 
+    /**
+     * Update snippet content from the index page
+     * 
+     */
     public function actionSaveContent()
     {
         $this->requirePostRequest();
@@ -122,7 +129,7 @@ class SnippetsController extends Controller
     }
 
     /**
-     * edit/create snippets
+     * edit/create snippets page
      */
     public function actionEdit($id = null)
     {
@@ -136,6 +143,10 @@ class SnippetsController extends Controller
         return $this->renderTemplate('global-snippets/_edit', $variables);
     }
 
+    /**
+     * Save snippet group
+     * 
+     */
     public function actionSaveGroup()
     {
         $this->requirePostRequest();
@@ -163,6 +174,10 @@ class SnippetsController extends Controller
         ]);
     }
 
+    /**
+     * Delete snippet by id
+     * 
+     */
     public function actionDeleteSnippet($id = null)
     {
         $this->requireLogin();
@@ -181,6 +196,10 @@ class SnippetsController extends Controller
         return $this->asJson(['success' => true]);
     }
 
+    /**
+     * Delete snippet group and associated snippets
+     * 
+     */
     public function actionDeleteSnippetGroup($id = null)
     {
         $this->requireLogin();
