@@ -16,32 +16,34 @@
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'settings' %}
 {% set title = snippet.name|length ? snippet.name : 'Add New Snippet' %}
+
 {% set options = [] %}
 {% for group in groups %}
     {% set options = options|merge([{ label: group.name|title, value: group.id|lower }]) %} 
 {% endfor %}
+
 {% set crumbs = [
     { label: "Global Snippets", url: url('global-snippets/') },
     { label: "Settings", url: url('global-snippets/settings') }, 
 ] %}
 
+{% set fullPageForm = true %}
+{% set saveShortcutRedirect = 'global-snippets/settings' %}
+
 {% block content %}
     <h2>{{ snippet.name|length ? 'Edit ' ~ snippet.name : 'Add New'}}</h2>
-    <form method="POST">
     {{ csrfInput() }}
     {{ redirectInput('global-snippets/settings') }}
     {{ forms.hidden({
     name: 'action',
     value: 'global-snippets/snippets/save' })
     }}
-    {#  ID -HIDDEN #}
     {{ forms.hidden({
     label: 'Snippet ID',
     id: 'snippetId',
     name: 'snippetId',
     value: snippet.id ?? '' })
     }}
-    {# NAME #}
     {{ forms.textField({
     label: 'Name',
     instructions: 'Add/Edit snippet name',
@@ -50,7 +52,6 @@
     value: snippet.name ?? '',
     required: true, })
     }}
-    {# HANDLE #}
     {{ forms.textField({
     label: 'Snippet Handle',
     instructions: 'How it is referenced in templates',
@@ -59,10 +60,9 @@
     value: snippet.handle ?? '',
     required: true, })
     }}
-    {# SNIPPET GROUP #}
     <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
         <div class="heading">
-            <label for="content">Snippet Group</label>
+            <label for="snippetGroup">Snippet Group</label>
             <div class="instructions">Select a Snippet Group or create a new one?</div>
         </div>
     <div class="flex">
@@ -71,38 +71,32 @@
                     id: 'snippetGroup',
                     name: 'snippetGroup',
                     options: options,
-                    value: snippet.snippetGroup|length ? groups[snippet.snippetGroup].id ,
+                    value: snippet.snippetGroupId|length ? groups[snippet.snippetGroupId].id ,
                     required: true
                 }) }}
             </div>
         </div>
     </div>
-    {# Custom Instructions #}
     {{ forms.textField({
     label: 'Instruction',
     instructions: 'Enter user instructions',
     id: 'instruction',
     name: 'instruction',
     value: snippet.instruction,
-    required: true })
+    required: false })
     }}
     <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
         <div class="heading">
-            <label for="content">Content</label>
+            <label for="snippetContent">Content</label>
             <div class="instructions">Enter default content</div>
         </div>
         {{ forms.textArea({
-            id: 'content',
-            name: 'content',
+            id: 'snippetContent',
+            name: 'snippetContent',
             value: snippet.content ?? '',
             require: true, })
         }}
     </div>
-
-        <div class="buttons">
-        <input type="submit" value="Save" class="btn submit add icon">
-    </div>
-</form>
 {% endblock %}
 
 {% if snippet is empty or snippet.handle is empty %}

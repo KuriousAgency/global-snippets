@@ -16,13 +16,16 @@
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'snippets' %}
 {% set title = "Global Snippets" %}
+
 {% set currentGroup = craft.request.segments|last %}
 {% if currentGroup == 'global-snippets' %}
     {% set selectedSidebarNavItem = 'all' %}
 {% else %}
     {% set selectedSidebarNavItem = currentGroup %}
 {% endif %}
+
 {% set fullPageForm = true %}
+{% set saveShortcutRedirect = 'global-snippets/' ~ ((currentGroup == 'global-snippets') ? '' : currentGroup) %}
 
 {% block actionButton %}
         <div class="buttons">
@@ -33,7 +36,6 @@
 {% block sidebar %}
     <h2>Groups</h2>
     <div id="groups">
-        {# {% include "_includes/nav" with { items: sidebarNavItems, selectedItem: selectedSidebarNavItem } only %} #}
         <nav>
             <ul id="groups">
                 <li><a href="{{ url('global-snippets/') }}"{% if selectedSidebarNavItem == 'all' %} class="sel"{% endif %}>All</a></li>
@@ -52,37 +54,29 @@
         {% set redirect = craft.request.getUrl %}
         {{ csrfInput() }}
         {{ redirectInput( redirect ) }}
+        {{ forms.hidden({
+            name: 'action',
+            value: 'global-snippets/snippets/save-content' })
+        }}
         {% for snippet in snippets %}
-            {% if (snippet.snippetGroup == selectedSidebarNavItem)  or (selectedSidebarNavItem =='all') %}
-            {# <form method="POST"> #}
-                {{ forms.hidden({
-                name: 'action',
-                value: 'global-snippets/snippets/save-content' })
-                }}
-                <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
-                    <div class="heading">
-                        <label id="{{ snippet.handle }}"  for="{{ snippet.handle }}">{{ snippet.name }}</label>
-                        <div class="instructions">{{ snippet.instruction }}</div>
-                    </div>
-                    {{ forms.textArea({
-                        id: snippet.handle,
-                        name: 'content['~snippet.id~']',
-                        instructions: snippet.instruction,
-                        value: snippet.content ?? '',
-                        require: true, })
-                    }}
-                    {# ID -HIDDEN #}
-                    {{ forms.hidden({
-                        id: 'snippetId',
-                        name: 'snippetId['~snippet.id~']',
-                        value: snippet.id ?? '' })
-                    }}
+            <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
+                <div class="heading">
+                    <label id="{{ snippet.handle }}"  for="{{ snippet.handle }}">{{ snippet.name }}</label>
+                    <div class="instructions">{{ snippet.instruction }}</div>
                 </div>
-                {# <div class="buttons">
-                    <input type="submit" value="Save" class="btn submit add icon">
-                </div> #}
-            {# </form> #}
-            {% endif %}
+                {{ forms.textArea({
+                    id: snippet.handle,
+                    name: 'content['~snippet.id~']',
+                    instructions: snippet.instruction,
+                    value: snippet.content ?? '',
+                    require: true, })
+                }}
+                {{ forms.hidden({
+                    id: 'snippetId',
+                    name: 'snippetId['~snippet.id~']',
+                    value: snippet.id ?? '' })
+                }}
+            </div>
         {% endfor %}
     </div>
 {% endblock %}
