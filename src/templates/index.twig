@@ -3,15 +3,16 @@
 /**
  * Global Snippets plugin for Craft CMS 3.x
  *
- * Global Snippets index.twig
+ * Global Snippets Settings.twig
  *
  * @author    Kurious Agency
- * @copyright Copyright (c) 2018 Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
  * @link      https://kurious.agency
  * @package   GlobalSnippets
- * @since     1.0.0
+ * @since     2.0.0
  */
 #}
+
 {% extends '_layouts/cp' %}
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'snippets' %}
@@ -24,14 +25,8 @@
     {% set selectedSidebarNavItem = currentGroup %}
 {% endif %}
 
-{% set fullPageForm = true %}
+{# {% set fullPageForm = true %} #}
 {% set saveShortcutRedirect = 'global-snippets/' ~ ((currentGroup == 'global-snippets') ? '' : currentGroup) %}
-
-{% block actionButton %}
-        <div class="buttons">
-            <input type="submit" value="Save" class="btn submit add icon">
-        </div>
-{% endblock %}
 
 {% block sidebar %}
     <h2>Groups</h2>
@@ -50,7 +45,7 @@
 
 {% block content %}
     <h2>Edit Site Global Snippets</h2>
-    <div id="fields">
+    <div id="snippets">
         {% set redirect = craft.request.getUrl %}
         {{ csrfInput() }}
         {{ redirectInput( redirect ) }}
@@ -59,24 +54,26 @@
             value: 'global-snippets/snippets/save-content' })
         }}
         {% for snippet in snippets %}
-            <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
-                <div class="heading">
-                    <label id="{{ snippet.handle }}"  for="{{ snippet.handle }}">{{ snippet.name }}</label>
-                    <div class="instructions">{{ snippet.instruction }}</div>
-                </div>
-                {{ forms.textArea({
-                    id: snippet.handle,
-                    name: 'content['~snippet.id~']',
-                    instructions: snippet.instruction,
-                    value: snippet.content ?? '',
-                    require: true, })
+            <form method="post">
+                {% set redirect = craft.request.getUrl %}
+                {{ csrfInput() }}
+                {{ redirectInput( redirect ) }}
+                {{ forms.hidden({
+                    name: 'action',
+                    value: 'global-snippets/snippets/save-content' })
                 }}
                 {{ forms.hidden({
                     id: 'snippetId',
-                    name: 'snippetId['~snippet.id~']',
+                    name: 'snippetId',
                     value: snippet.id ?? '' })
                 }}
-            </div>
+                {% include "_includes/fields" with {
+                    fields: snippet.getFieldLayout() ? snippet.getFieldLayout().getFields() : '',
+                    element: snippet} only %}
+                <div class="buttons">
+                    <input type="submit" value="Save" class="btn submit add icon">
+                </div>
+            </form>
         {% endfor %}
     </div>
 {% endblock %}

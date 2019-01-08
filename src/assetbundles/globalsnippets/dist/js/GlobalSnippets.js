@@ -1,13 +1,13 @@
 /**
  * Global Snippets plugin for Craft CMS
  *
- * Snippets Field JS
+ * Global Snippets JS
  *
  * @author    Kurious Agency
- * @copyright Copyright (c) 2018 Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
  * @link      https://kurious.agency
  * @package   GlobalSnippets
- * @since     1.0.0
+ * @since     2.0.0
  */
 (function($) {
     /** global: Craft */
