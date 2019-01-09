@@ -69,7 +69,7 @@ class Snippets extends Component
     public function getAllSnippets(): array
     {
         $snippetQuery = Snippet::find();
-        $snippets = $snippetQuery->all();
+        $snippets = $snippetQuery->orderBy('name')->all();
         return $snippets;
     }
     /**
@@ -80,7 +80,7 @@ class Snippets extends Component
     {
         $snippetQuery = Snippet::find();
         $snippets = $snippetQuery->snippetGroupId($groupId);
-        return $snippets->all();
+        return $snippets->orderBY('name')->all();
     }
     /**
      * Get all snippet groups.
@@ -89,6 +89,7 @@ class Snippets extends Component
     public function getAllSnippetGroups(): array
     {
         $query = $this->_createGroupQuery()
+            ->orderBy('name')
             ->all();
         $groups = [];
         foreach ($query as $row) {
