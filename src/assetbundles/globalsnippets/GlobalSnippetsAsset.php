@@ -36,7 +36,7 @@ class GlobalSnippetsAsset extends AssetBundle
         ];
 
         $this->js = [
-            'js/GlobalSnippets.js',
+            'js/GlobalSnippetsSettings.js',
         ];
 
         $this->css = [

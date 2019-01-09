@@ -54,7 +54,7 @@
             value: 'global-snippets/snippets/save-content' })
         }}
         {% for snippet in snippets %}
-            <form method="post">
+            <form method="post" id="snippet-{{ snippet.id }}">
                 {% set redirect = craft.request.getUrl %}
                 {{ csrfInput() }}
                 {{ redirectInput( redirect ) }}
@@ -77,3 +77,19 @@
         {% endfor %}
     </div>
 {% endblock %}
+
+{% js %}
+    {% for snippet in snippets %}
+        {% set field = snippet.getFieldLayout().getFields()[0] %}
+        {% set selector = '#snippet-' ~ snippet.id ~ ' #fields-' ~ field|lower ~ '-field .heading' %}
+        $('{{ selector }} #fields-{{ field|lower }}-label').text('{{ snippet.name }}');
+        {% if snippet.instruction|length and field.instructions|length %}
+            $('{{ selector }} div.instructions').text('{{ snippet.instruction }}');
+        {% elseif field.instructions|length and snippet.instruction|length == 0 %}
+            $('{{ selector }} div.instructions').remove();
+        {% else %}
+            $('{{ selector }}').append('<div class="instructions">{{ snippet.instruction }}</div>');
+        {% endif %}
+    {% endfor %}
+{% endjs %}
+
