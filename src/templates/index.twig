@@ -70,16 +70,24 @@
 
 {% js %}
     {% for snippet in snippets %}
-        {% set field = snippet.getFieldLayout().getFields()[0] %}
-        {% set selector = '#snippets #fields-' ~ snippet.id ~ '-' ~ field|lower ~ '-field .heading' %}
-        $('{{ selector }} #fields-{{ snippet.id}}-{{ field|lower }}-label').text('{{ snippet.name }}');
-        {% if snippet.instruction|length and field.instructions|length %}
-            $('{{ selector }} div.instructions').text('{{ snippet.instruction }}');
-        {% elseif field.instructions|length and snippet.instruction|length == 0 %}
-            $('{{ selector }} div.instructions').remove();
-        {% else %}
-            $('{{ selector }}').append('<div class="instructions">{{ snippet.instruction }}</div>');
-        {% endif %}
+        {% set fields = snippet.getFieldLayout().getFields() %}
+        {% for field in fields %}
+            {% set selector = '#snippets #fields-' ~ snippet.id ~ '-' ~ field.handle ~ '-field .heading' %}
+            {% if loop.index == 1 %}
+                $('{{ selector }} #fields-{{ snippet.id}}-{{ field.handle }}-label').text('{{ snippet.name }}');
+                {% if snippet.instruction|length and field.instructions|length %}
+                    $('{{ selector }} div.instructions').text('{{ snippet.instruction }}');
+                {% elseif field.instructions|length and snippet.instruction|length == 0 %}
+                    $('{{ selector }} div.instructions').remove();
+                {% else %}
+                    $('{{ selector }}').append('<div class="instructions">{{ snippet.instruction }}</div>');
+                {% endif %}
+            {% else %}
+                //console.log({{field|lower}});
+                //console.log($('{{ selector }} #fields-{{ snippet.id}}-{{ field.handle }}-label'));
+                $('{{ selector }} #fields-{{ snippet.id}}-{{ field.handle }}-label').hide();
+            {% endif %}
+        {% endfor %}
     {% endfor %}
 {% endjs %}
 

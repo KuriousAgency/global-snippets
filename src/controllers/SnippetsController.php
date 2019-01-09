@@ -133,7 +133,6 @@ class SnippetsController extends Controller
         foreach ($fields as $key => $value){
             $snippet = GlobalSnippets::$plugin->snippets->getSnippetById($key);
             if ($snippet) {
-                // Craft::dd($snippet->setFieldValuesFromRequest('fields['.$key.']'));
                 $snippet->setFieldValues($value);
                 $response = Craft::$app->elements->saveElement($snippet);
                 if ($response === true) {
