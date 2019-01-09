@@ -129,15 +129,18 @@ class SnippetsController extends Controller
     {
         $this->requirePostRequest();
         $request = Craft::$app->getRequest();
-        $id = $request->getBodyParam('snippetId');
-        $snippet = GlobalSnippets::$plugin->snippets->getSnippetById($id);
-        if ($snippet) {
-            $snippet->setFieldValuesFromRequest('fields');
-            $response = Craft::$app->elements->saveElement($snippet);
-            if ($response === true) {
-                Craft::$app->getSession()->setNotice('Snippet saved.');
-            } else {
-                Craft::$app->getSession()->setError($response);
+        $fields = $request->getBodyParam('fields');
+        foreach ($fields as $key => $value){
+            $snippet = GlobalSnippets::$plugin->snippets->getSnippetById($key);
+            if ($snippet) {
+                // Craft::dd($snippet->setFieldValuesFromRequest('fields['.$key.']'));
+                $snippet->setFieldValues($value);
+                $response = Craft::$app->elements->saveElement($snippet);
+                if ($response === true) {
+                    Craft::$app->getSession()->setNotice('Snippet saved.');
+                } else {
+                    Craft::$app->getSession()->setError($response);
+                }
             }
         }
         return $this->redirectToPostedUrl();

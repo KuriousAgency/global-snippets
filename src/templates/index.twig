@@ -25,8 +25,14 @@
     {% set selectedSidebarNavItem = currentGroup %}
 {% endif %}
 
-{# {% set fullPageForm = true %} #}
+{% set fullPageForm = true %}
 {% set saveShortcutRedirect = 'global-snippets/' ~ ((currentGroup == 'global-snippets') ? '' : currentGroup) %}
+
+{% block actionButton %}
+        <div class="buttons">
+            <input type="submit" value="Save" class="btn submit add icon">
+        </div>
+{% endblock %}
 
 {% block sidebar %}
     <h2>Groups</h2>
@@ -54,26 +60,10 @@
             value: 'global-snippets/snippets/save-content' })
         }}
         {% for snippet in snippets %}
-            <form method="post" id="snippet-{{ snippet.id }}">
-                {% set redirect = craft.request.getUrl %}
-                {{ csrfInput() }}
-                {{ redirectInput( redirect ) }}
-                {{ forms.hidden({
-                    name: 'action',
-                    value: 'global-snippets/snippets/save-content' })
-                }}
-                {{ forms.hidden({
-                    id: 'snippetId',
-                    name: 'snippetId',
-                    value: snippet.id ?? '' })
-                }}
                 {% include "_includes/fields" with {
+                    namespace: 'fields['~snippet.id~']',
                     fields: snippet.getFieldLayout() ? snippet.getFieldLayout().getFields() : '',
-                    element: snippet} only %}
-                <div class="buttons">
-                    <input type="submit" value="Save" class="btn submit add icon">
-                </div>
-            </form>
+                    element: snippet} only %}            
         {% endfor %}
     </div>
 {% endblock %}
@@ -81,8 +71,8 @@
 {% js %}
     {% for snippet in snippets %}
         {% set field = snippet.getFieldLayout().getFields()[0] %}
-        {% set selector = '#snippet-' ~ snippet.id ~ ' #fields-' ~ field|lower ~ '-field .heading' %}
-        $('{{ selector }} #fields-{{ field|lower }}-label').text('{{ snippet.name }}');
+        {% set selector = '#snippets #fields-' ~ snippet.id ~ '-' ~ field|lower ~ '-field .heading' %}
+        $('{{ selector }} #fields-{{ snippet.id}}-{{ field|lower }}-label').text('{{ snippet.name }}');
         {% if snippet.instruction|length and field.instructions|length %}
             $('{{ selector }} div.instructions').text('{{ snippet.instruction }}');
         {% elseif field.instructions|length and snippet.instruction|length == 0 %}
