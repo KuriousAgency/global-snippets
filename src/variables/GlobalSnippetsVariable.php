@@ -24,16 +24,25 @@ class GlobalSnippetsVariable
     // Public Methods
     // =========================================================================
 
-    /**
-     * @param null $optional
-     * @return string
-     */
-    public function exampleVariable($optional = null)
+    public function __construct($config = [])
     {
-        $result = "And away we go to the Twig template...";
-        if ($optional) {
-            $result = "I'm feeling optional today...";
+		$components = GlobalSnippets::$plugin->components;
+		unset($components['migrator']);
+        $config['components'] = $components;
+		parent::__construct($config);
+	}
+	/**
+     * Provides the snippets to the templates in the format:
+     * 
+     * {{ craft.GlobalSnippets.[group handle].[snippet handle] }} 
+     */
+	public function __call($handle, $args)
+	{
+        $snippets =  GlobalSnippets::$plugin->snippets->getSnippetGroup($handle)->getGroupSnippets();
+        $variables = [];
+        foreach ($snippets as $snippet){
+            $variables[$snippet->handle] = $snippet->content;
         }
-        return $result;
-    }
+        return $variables;
+	}
 }
