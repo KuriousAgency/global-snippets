@@ -11,6 +11,7 @@
 namespace kuriousagency\globalsnippets\variables;
 
 use kuriousagency\globalsnippets\GlobalSnippets;
+use yii\di\ServiceLocator;
 
 use Craft;
 
@@ -19,7 +20,7 @@ use Craft;
  * @package   GlobalSnippets
  * @since     2.0.0
  */
-class GlobalSnippetsVariable
+class GlobalSnippetsVariable extends ServiceLocator
 {
     // Public Methods
     // =========================================================================
@@ -41,7 +42,9 @@ class GlobalSnippetsVariable
         $snippets =  GlobalSnippets::$plugin->snippets->getSnippetGroup($handle)->getGroupSnippets();
         $variables = [];
         foreach ($snippets as $snippet){
-            $variables[$snippet->handle] = $snippet->content;
+            foreach ($snippet->getFieldValues() as $key => $value){
+            $variables[$snippet->handle] = $value;
+            }
         }
         return $variables;
 	}
