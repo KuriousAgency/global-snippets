@@ -3,13 +3,13 @@
 /**
  * Global Snippets plugin for Craft CMS 3.x
  *
- * Global Snippets settings.twig
+ * Global Snippets Settings.twig
  *
  * @author    Kurious Agency
- * @copyright Copyright (c) 2018 Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
  * @link      https://kurious.agency
  * @package   GlobalSnippets
- * @since     1.0.0
+ * @since     2.0.0
  */
 #}
 {% extends '_layouts/cp' %}
@@ -24,7 +24,7 @@
     {% set selectedSidebarNavItem = currentGroup %}
 {% endif %}
 
-{% do view.registerAssetBundle("kuriousagency\\globalsnippets\\assetbundles\\snippetscpsection\\SnippetsCPSectionAsset") %}
+{% do view.registerAssetBundle("kuriousagency\\globalsnippets\\assetbundles\\globalsnippets\\GlobalSnippetsAsset") %}
 
 {% block actionButton %}
     {% if currentUser.admin %}

@@ -2,16 +2,16 @@
 /**
  * Global Snippets plugin for Craft CMS 3.x
  *
- * Previous hardcoded template snippets
+ * Create re-usable chunks of content for templates
  *
  * @link      https://kurious.agency
- * @copyright Copyright (c) 2018 Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
  */
 
 namespace kuriousagency\globalsnippets\controllers;
 
 use kuriousagency\globalsnippets\GlobalSnippets;
-use kuriousagency\globalsnippets\models\Snippet;
+use kuriousagency\globalsnippets\elements\Snippet;
 use kuriousagency\globalsnippets\models\SnippetGroup;
 
 use Craft;
@@ -19,10 +19,11 @@ use craft\web\Controller;
 use craft\helpers\StringHelper;
 use yii\web\Response;
 
+
 /**
  * @author    Kurious Agency
  * @package   GlobalSnippets
- * @since     1.0.0
+ * @since     2.0.0
  */
 class SnippetsController extends Controller
 {
@@ -41,7 +42,6 @@ class SnippetsController extends Controller
     // =========================================================================
 
     /**
-     * Load index page
      * @return mixed
      */
     public function actionIndex($snippetGroupId = null): Response
@@ -53,9 +53,11 @@ class SnippetsController extends Controller
             $variables['snippets'] = GlobalSnippets::$plugin->snippets->getSnippetsByGroup($snippetGroupId);
         }
         $variables['groups'] = GlobalSnippets::$plugin->snippets->getAllSnippetGroups();
+        $layout = Craft::$app->fields->getLayoutByType(Snippet::class);
 
         return $this->renderTemplate('global-snippets/index', $variables);
     }
+
     /**
      * Load settings page
      * @return mixed
@@ -90,11 +92,24 @@ class SnippetsController extends Controller
         }
         // Shared attributes
         $snippet->name = $request->getBodyParam('name', $snippet->name);
+        $snippet->title = $snippet->name;
         $snippet->handle = $request->getBodyParam('handle',$snippet->handle);
         $snippet->snippetGroupId = $request->getBodyParam('snippetGroup', $snippet->snippetGroupId);
         $snippet->instruction = $request->getBodyParam('instruction', $snippet->instruction);
-        $snippet->content = $request->getBodyParam('snippetContent', $snippet->content);
+        //$snippet->setFieldValuesFromRequest('fields');
         // Save it
+        if (Craft::$app->elements->saveElement($snippet)) {
+            $fieldLayout = Craft::$app->getFields()->assembleLayoutFromPost();
+            $fieldLayout->type = Snippet::class . '\\' . $snippet->handle;
+            Craft::$app->getFields()->saveLayout($fieldLayout);
+            Craft::$app->getSession()->setNotice('Snippet Saved.');
+            return $this->redirectToPostedUrl($snippet);
+        } else {
+            Craft::$app->getSession()->setError('Couldn\'t save snippet.');
+        }
+
+
+
         $response = GlobalSnippets::$plugin->snippets->saveSnippet($snippet);
         //Craft::dd($response);
         if ($response === true) {
@@ -114,15 +129,17 @@ class SnippetsController extends Controller
     {
         $this->requirePostRequest();
         $request = Craft::$app->getRequest();
-        $fields = $request->getBodyParam('content');
+        $fields = $request->getBodyParam('fields');
         foreach ($fields as $key => $value){
             $snippet = GlobalSnippets::$plugin->snippets->getSnippetById($key);
-            $snippet->content = $value;
-            $response = GlobalSnippets::$plugin->snippets->saveSnippet($snippet);
-            if ($response === true) {
-                Craft::$app->getSession()->setNotice('Snippet saved.');
-            } else {
-                Craft::$app->getSession()->setError($response);
+            if ($snippet) {
+                $snippet->setFieldValues($value);
+                $response = Craft::$app->elements->saveElement($snippet);
+                if ($response === true) {
+                    Craft::$app->getSession()->setNotice('Snippet saved.');
+                } else {
+                    Craft::$app->getSession()->setError($response);
+                }
             }
         }
         return $this->redirectToPostedUrl();

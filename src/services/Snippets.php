@@ -2,16 +2,16 @@
 /**
  * Global Snippets plugin for Craft CMS 3.x
  *
- * Previous hardcoded template snippets
+ * Create re-usable chunks of content for templates
  *
  * @link      https://kurious.agency
- * @copyright Copyright (c) 2018 Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
  */
 
 namespace kuriousagency\globalsnippets\services;
 
 // use kuriousagency\globalsnippets\GlobalSnippets;
-use kuriousagency\globalsnippets\models\Snippet;
+use kuriousagency\globalsnippets\elements\Snippet;
 use kuriousagency\globalsnippets\models\SnippetGroup;
 use kuriousagency\globalsnippets\records\Snippets as SnippetRecord;
 use kuriousagency\globalsnippets\records\SnippetGroup as SnippetGroupRecord;
@@ -44,11 +44,13 @@ class Snippets extends Component
      */
     public function getSnippetById(int $id)
     {
-        $result = $this->_createSnippetQuery()
-            ->where(['id' => $id])
-            ->one();
+        if (!$id) {
+            return null;
+        }
+        $query = Snippet::find();
+        $query->id($id);
 
-        return $result ? new Snippet($result) : null;
+        return $query->one();
     }
         /**
      * Get a snippet by its Handle.
@@ -57,11 +59,13 @@ class Snippets extends Component
      */
     public function getSnippetByHandle(string $handle)
     {
-        $result = $this->_createSnippetQuery()
-            ->where(['handle' => $handle])
-            ->one();
+        if (!$id) {
+            return null;
+        }
+        $query = Snippet::find();
+        $query->handle($handle);
 
-        return $result ? new Snippet($result) : null;
+        return $query->one();
     }
     /**
      * Get all snipepts.
@@ -69,13 +73,8 @@ class Snippets extends Component
      */
     public function getAllSnippets(): array
     {
-        $rows = $this->_createSnippetQuery()->all();
-
-        $snippets = [];
-        foreach ($rows as $row) {
-            $snippets[] = new Snippet($row);
-        }
-
+        $snippetQuery = Snippet::find();
+        $snippets = $snippetQuery->orderBy('name')->all();
         return $snippets;
     }
     /**
@@ -84,16 +83,9 @@ class Snippets extends Component
      */
     public function getSnippetsByGroup(int $groupId): array
     {
-        $rows = $this->_createSnippetQuery()
-            ->where(['snippetGroupId' => $groupId])
-            ->all();
-
-        $snippets = [];
-        foreach ($rows as $row) {
-            $snippets[] = new Snippet($row);
-        }
-
-        return $snippets;
+        $snippetQuery = Snippet::find();
+        $snippets = $snippetQuery->snippetGroupId($groupId);
+        return $snippets->orderBY('name')->all();
     }
     /**
      * Get all snippet groups.
@@ -102,6 +94,7 @@ class Snippets extends Component
     public function getAllSnippetGroups(): array
     {
         $query = $this->_createGroupQuery()
+            ->orderBy('name')
             ->all();
         $groups = [];
         foreach ($query as $row) {
@@ -168,7 +161,31 @@ class Snippets extends Component
      * @param Snippet $model
      * @return bool
      * @throws \Exception
+     *
+     *   public function saveSnippet(Snippet $model, bool $runValidation = true)
+     *   {
+     *       if ($model->id) {
+     *           $record = SnippetRecord::findOne($model->id);
+     *           if (!$record) {
+     *               throw new Exception(Craft::t('global-snippets', 'No snippet exists with the ID “{id}”', ['id' => $model->id]));
+     *           }
+     *       } else {
+     *           $record = new SnippetRecord();
+     *           if ($this->getSnippetByHandle($model->handle)){
+     *               return Craft::t('global-snippets', 'A snippet already exists with the handle: “{handle}”', ['handle' => $model->handle]);
+     *           }
+     *       }
+     *       $record->name = $model->name;
+     *       $record->snippetGroupId = $model->snippetGroupId;
+     *       $record->content = $model->content;
+     *       $record->handle = $model->handle;
+     *       $record->instruction = $model->instruction;
+     *       $record->save(false);
+     *       $model->id = $record->id;
+     *       return true;
+     *   }
      */
+<<<<<<< HEAD
     public function saveSnippet(Snippet $model, bool $runValidation = true)
     {
         if ($model->id) {
@@ -205,6 +222,8 @@ class Snippets extends Component
 
         return true;
     }
+=======
+>>>>>>> 3716d65289973815e1eb7b2de08f4ae4d8d808bc
 
     /**
      * Delete a snippet by Id
@@ -212,11 +231,16 @@ class Snippets extends Component
      */
     public function deleteSnippetById($id)
     {
-        $snippet = SnippetRecord::findOne($id);
+        $snippet = Snippet::findOne($id);
 
         if ($snippet) {
+<<<<<<< HEAD
 			Craft::$app->getProjectConfig()->remove(self::CONFIG_SNIPPET_KEY . '.' . $snippet->uid);
             return true;//$snippet->delete();
+=======
+            Craft::$app->getElements()->deleteElement($snippet);
+            return true;
+>>>>>>> 3716d65289973815e1eb7b2de08f4ae4d8d808bc
         }
 
         return false;
@@ -390,7 +414,7 @@ class Snippets extends Component
      * Gets a snippet group record or creates a new one.
      * 
      * @param SnippetGroup $group
-     * @return SnippetGroupREcord
+     * @return SnippetGroupRecord
      */
     private function _getGroupRecord(SnippetGroup $group)
     {
@@ -417,3 +441,4 @@ class Snippets extends Component
 		return SnippetGroupRecord::findOne(['uid' => $uid]) ?? new SnippetGroupRecord();
 	}
 }
+

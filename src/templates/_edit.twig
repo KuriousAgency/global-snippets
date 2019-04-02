@@ -3,15 +3,16 @@
 /**
  * Global Snippets plugin for Craft CMS 3.x
  *
- * Global Snippets _edit.twig
+ * Global Snippets Settings.twig
  *
  * @author    Kurious Agency
- * @copyright Copyright (c) 2018 Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
  * @link      https://kurious.agency
  * @package   GlobalSnippets
- * @since     1.0.0
+ * @since     2.0.0
  */
 #}
+
 {% extends '_layouts/cp' %}
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'settings' %}
@@ -85,18 +86,9 @@
     value: snippet.instruction,
     required: false })
     }}
-    <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
-        <div class="heading">
-            <label for="snippetContent">Content</label>
-            <div class="instructions">Enter default content</div>
-        </div>
-        {{ forms.textArea({
-            id: 'snippetContent',
-            name: 'snippetContent',
-            value: snippet.content ?? '',
-            require: true, })
-        }}
-    </div>
+    {% include "_includes/fieldlayoutdesigner" with {
+        fieldLayout: craft.app.fields.getLayoutByType('kuriousagency\\globalsnippets\\elements\\Snippet\\'~snippet.handle)
+    } only %}
 {% endblock %}
 
 {% if snippet is empty or snippet.handle is empty %}

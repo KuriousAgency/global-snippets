@@ -1,6 +1,6 @@
 {
 	"name": "kuriousagency/global-snippets",
-	"description": "Previous hardcoded template snippets",
+	"description": "Create re-usable chunks of content for templates",
 	"type": "craft-plugin",
 	"version": "2.1.0",
 	"keywords": [
@@ -10,6 +10,10 @@
 		"craft-plugin",
 		"global snippets"
 	],
+	"support": {
+		"docs": "https://github.com/KuriousAgency",
+		"issues": "https://github.com/KuriousAgency"
+	},
 	"license": "MIT",
 	"authors": [
 		{
@@ -28,7 +32,7 @@
 	"extra": {
 		"name": "Global Snippets",
 		"handle": "global-snippets",
-		"hasCpSettings": false,
+		"hasCpSettings": true,
 		"hasCpSection": true,
 		"components": {
 			"snippets": "kuriousagency\\globalsnippets\\services\\Snippets"
