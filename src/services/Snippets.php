@@ -22,6 +22,8 @@ use craft\base\Component;
 use craft\db\Query;
 use craft\db\Command;
 use yii\base\Exception;
+use craft\events\ConfigEvent;
+use craft\helpers\Db;
 
 /**
  * @author    Kurious Agency
@@ -30,6 +32,9 @@ use yii\base\Exception;
  */
 class Snippets extends Component
 {
+	const CONFIG_SNIPPET_KEY = 'snippets.snippet';
+	const CONFIG_SNIPPET_GROUP_KEY = 'snippets.group';
+
     // Public Methods
     // =========================================================================
 
@@ -137,7 +142,16 @@ class Snippets extends Component
 
         if ($isNewGroup) {
             $model->id = $record->id;
-        }
+		}
+		
+		$projectConfig = Craft::$app->getProjectConfig();
+		$configData = [
+			'name' => $record->name,
+			'handle' => $record->handle,
+		];
+		$configPath = self::CONFIG_SNIPPET_GROUP_KEY . '.' . $record->uid;
+		$projectConfig->set($configPath, $configData);
+
         return true;
     }
             
@@ -169,7 +183,18 @@ class Snippets extends Component
         $record->save(false);
 
         // Now that we have a record ID, save it on the model
-        $model->id = $record->id;
+		$model->id = $record->id;
+		
+		$projectConfig = Craft::$app->getProjectConfig();
+		$configData = [
+			'name' => $record->name,
+			'snippetGroup' => $record->snippetGroup,
+			'content' => $record->content,
+			'handle' => $record->handle,
+			'instruction' => $record->instruction,
+		];
+		$configPath = self::CONFIG_SNIPPET_KEY . '.' . $record->uid;
+		$projectConfig->set($configPath, $configData);
 
         return true;
     }
@@ -179,7 +204,8 @@ class Snippets extends Component
         $snippet = SnippetRecord::findOne($id);
 
         if ($snippet) {
-            return $snippet->delete();
+			Craft::$app->getProjectConfig()->remove(self::CONFIG_SNIPPET_KEY . '.' . $snippet->uid);
+            return true;//$snippet->delete();
         }
 
         return false;
@@ -199,11 +225,111 @@ class Snippets extends Component
     {
         $group = SnippetGroupRecord::findOne($id);
         if ($group) {
-            $this->deleteSnippetsByGroup($id);
-            return $group->delete();
+			Craft::$app->getProjectConfig()->remove(self::CONFIG_SNIPPET_GROUP_KEY . '.' . $group->uid);
+            //$this->deleteSnippetsByGroup($id);
+            return true;//$group->delete();
         }
         return false;
-    }
+	}
+	
+
+
+	public function handleChangedSnippet(ConfigEvent $event)
+	{
+		$uid = $event->tokenMatches[0];
+		$data = $event->newValue;
+
+		$transaction = Craft::$app->getDb()->beginTransaction();
+		try {
+			$record = $this->_getSnippetRecord($uid);
+
+			$record->name = $data['name'];
+        	$record->snippetGroup = $data['snippetGroup'];
+        	$record->content = $data['content'];
+        	$record->handle = $data['handle'];
+			$record->instruction = $data['instruction'];
+			$record->uid = $uid;
+
+			$record->save(false);
+			$transaction->commit();
+
+		} catch (\Throwable $e) {
+			$transaction->rollBack();
+			throw $e;
+		}
+	}
+
+	public function handleDeleteSnippet(ConfigEvent $event)
+	{
+		$uid = $event->tokenMatches[0];
+		$record = $this->_getSnippetRecord($uid);
+
+		if (!$record->id) {
+			return;
+		}
+
+		$db = Craft::$app->getDb();
+		$transaction = $db->beginTransaction();
+
+		try {
+			$record->delete();
+			$transaction->commit();
+
+		} catch (\Throwable $e) {
+			$transaction->rollBack();
+			throw $e;
+		}
+	}
+
+	public function handleChangedSnippetGroup(ConfigEvent $event)
+	{
+		$uid = $event->tokenMatches[0];
+		$data = $event->newValue;
+
+		$transaction = Craft::$app->getDb()->beginTransaction();
+		try {
+			$record = $this->_getSnippetGroupRecord($uid);
+
+			$record->name = $data['name'];
+        	$record->handle = $data['handle'];
+			$record->uid = $uid;
+
+			$record->save(false);
+			$transaction->commit();
+
+		} catch (\Throwable $e) {
+			$transaction->rollBack();
+			throw $e;
+		}
+	}
+
+	public function handleDeleteSnippetGroup(ConfigEvent $event)
+	{
+		$uid = $event->tokenMatches[0];
+		$record = $this->_getSnippetGroupRecord($uid);
+
+		if (!$record->id) {
+			return;
+		}
+
+		$db = Craft::$app->getDb();
+		$transaction = $db->beginTransaction();
+		
+		try {
+			$snippets = SnippetRecord::find(['snippetGroup' => $record->handle])->limit(null)->all();
+			foreach ($snippets as $snippet)
+			{
+				$this->deleteSnippetById($snippet->id);
+			}
+
+			$record->delete();
+			$transaction->commit();
+
+		} catch (\Throwable $e) {
+			$transaction->rollBack();
+			throw $e;
+		}
+	}
 
     // Private Methods
     // =========================================================================
@@ -247,5 +373,15 @@ class Snippets extends Component
         }
 
         return $groupRecord;
-    }
+	}
+	
+	private function _getSnippetRecord(string $uid): SnippetRecord
+	{
+		return SnippetRecord::findOne(['uid' => $uid]) ?? new SnippetRecord();
+	}
+
+	private function _getSnippetGroupRecord(string $uid): SnippetRecord
+	{
+		return SnippetGroupRecord::findOne(['uid' => $uid]) ?? new SnippetGroupRecord();
+	}
 }
