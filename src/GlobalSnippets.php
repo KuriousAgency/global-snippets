@@ -2,23 +2,27 @@
 /**
  * Global Snippets plugin for Craft CMS 3.x
  *
- * Previous hardcoded template snippets
+ * Create re-usable chunks of content for templates
  *
  * @link      https://kurious.agency
- * @copyright Copyright (c) 2018 Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
  */
 
 namespace kuriousagency\globalsnippets;
 
 use kuriousagency\globalsnippets\services\Snippets as SnippetsService;
 use kuriousagency\globalsnippets\variables\GlobalSnippetsVariable;
+use kuriousagency\globalsnippets\models\Settings;
+use kuriousagency\globalsnippets\elements\Snippet as SnippetElement;
 
 use Craft;
 use craft\base\Plugin;
 use craft\services\Plugins;
 use craft\events\PluginEvent;
 use craft\web\UrlManager;
+use craft\services\Elements;
 use craft\web\twig\variables\CraftVariable;
+use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
 
 use yii\base\Event;
@@ -28,7 +32,7 @@ use yii\base\Event;
  *
  * @author    Kurious Agency
  * @package   GlobalSnippets
- * @since     1.0.0
+ * @since     2.0.0
  *
  * @property  SnippetsService $snippets
  */
@@ -48,7 +52,8 @@ class GlobalSnippets extends Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '1.0.0';
+    public $schemaVersion = '2.0.0';
+    public $hasCpSection = true;
 
     // Public Methods
     // =========================================================================
@@ -83,6 +88,14 @@ class GlobalSnippets extends Plugin
         );
 
         Event::on(
+            Elements::class,
+            Elements::EVENT_REGISTER_ELEMENT_TYPES,
+            function (RegisterComponentTypesEvent $event) {
+                $event->types[] = SnippetElement::class;
+            }
+        );
+
+        Event::on(
             CraftVariable::class,
             CraftVariable::EVENT_INIT,
             function (Event $event) {
@@ -97,7 +110,6 @@ class GlobalSnippets extends Plugin
             Plugins::EVENT_AFTER_INSTALL_PLUGIN,
             function (PluginEvent $event) {
                 if ($event->plugin === $this) {
-                    
                 }
             }
         );
@@ -123,5 +135,18 @@ class GlobalSnippets extends Plugin
         }
         return $item;
     }
-}
 
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * Returns the rendered settings HTML, which will be inserted into the content
+     * block on the settings page.
+     *
+     * @return string The rendered settings HTML
+     */
+    public function getSettingsResponse()
+    {   
+        return Craft::$app->controller->redirect('global-snippets/settings/');
+    }
+}

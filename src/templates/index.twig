@@ -3,15 +3,16 @@
 /**
  * Global Snippets plugin for Craft CMS 3.x
  *
- * Global Snippets index.twig
+ * Global Snippets Settings.twig
  *
  * @author    Kurious Agency
- * @copyright Copyright (c) 2018 Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
  * @link      https://kurious.agency
  * @package   GlobalSnippets
- * @since     1.0.0
+ * @since     2.0.0
  */
 #}
+
 {% extends '_layouts/cp' %}
 {% import "_includes/forms" as forms %}
 {% set selectedSubnavItem = 'snippets' %}
@@ -50,7 +51,7 @@
 
 {% block content %}
     <h2>Edit Site Global Snippets</h2>
-    <div id="fields">
+    <div id="snippets">
         {% set redirect = craft.request.getUrl %}
         {{ csrfInput() }}
         {{ redirectInput( redirect ) }}
@@ -59,24 +60,34 @@
             value: 'global-snippets/snippets/save-content' })
         }}
         {% for snippet in snippets %}
-            <div class="field" id="{{ snippet.handle }}-field" data-relabel="true">
-                <div class="heading">
-                    <label id="{{ snippet.handle }}"  for="{{ snippet.handle }}">{{ snippet.name }}</label>
-                    <div class="instructions">{{ snippet.instruction }}</div>
-                </div>
-                {{ forms.textArea({
-                    id: snippet.handle,
-                    name: 'content['~snippet.id~']',
-                    instructions: snippet.instruction,
-                    value: snippet.content ?? '',
-                    require: true, })
-                }}
-                {{ forms.hidden({
-                    id: 'snippetId',
-                    name: 'snippetId['~snippet.id~']',
-                    value: snippet.id ?? '' })
-                }}
-            </div>
+                {% include "_includes/fields" with {
+                    namespace: 'fields['~snippet.id~']',
+                    fields: snippet.getFieldLayout() ? snippet.getFieldLayout().getFields() : '',
+                    element: snippet} only %}            
         {% endfor %}
     </div>
 {% endblock %}
+
+{% js %}
+    {% for snippet in snippets %}
+        {% set fields = snippet.getFieldLayout().getFields() %}
+        {% for field in fields %}
+            {% set selector = '#snippets #fields-' ~ snippet.id ~ '-' ~ field.handle ~ '-field .heading' %}
+            {% if loop.index == 1 %}
+                $('{{ selector }} #fields-{{ snippet.id}}-{{ field.handle }}-label').text('{{ snippet.name }}');
+                {% if snippet.instruction|length and field.instructions|length %}
+                    $('{{ selector }} div.instructions').text('{{ snippet.instruction }}');
+                {% elseif field.instructions|length and snippet.instruction|length == 0 %}
+                    $('{{ selector }} div.instructions').remove();
+                {% else %}
+                    $('{{ selector }}').append('<div class="instructions">{{ snippet.instruction }}</div>');
+                {% endif %}
+            {% else %}
+                //console.log({{field|lower}});
+                //console.log($('{{ selector }} #fields-{{ snippet.id}}-{{ field.handle }}-label'));
+                $('{{ selector }} #fields-{{ snippet.id}}-{{ field.handle }}-label').hide();
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endjs %}
+

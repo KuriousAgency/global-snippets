@@ -1,6 +1,6 @@
 # Global Snippets plugin for Craft CMS 3.x
 
-Previous hardcoded template snippets
+Create re-usable chunks of content for templates
 
 ![Screenshot](resources/img/plugin-logo.png)
 
