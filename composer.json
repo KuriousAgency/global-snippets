@@ -2,11 +2,7 @@
     "name": "kuriousagency/global-snippets",
     "description": "Create re-usable chunks of content for templates",
     "type": "craft-plugin",
-<<<<<<< HEAD
-    "version": "1.0.1",
-=======
     "version": "2.0.0",
->>>>>>> release/v2.0.0
     "keywords": [
         "craft",
         "cms",
@@ -14,13 +10,10 @@
         "craft-plugin",
         "global snippets"
     ],
-<<<<<<< HEAD
-=======
     "support": {
         "docs": "https://github.com/KuriousAgency",
         "issues": "https://github.com/KuriousAgency"
     },
->>>>>>> release/v2.0.0
     "license": "MIT",
     "authors": [{
         "name": "Kurious Agency",
