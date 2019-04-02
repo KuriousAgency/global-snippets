@@ -105,11 +105,11 @@ class GlobalSnippets extends Plugin
 		$projectConfigService = Craft::$app->getProjectConfig();
 
 		$snippetService = $this->snippets;
-		$snippetService->onAdd(SnippetsService::CONFIG_SNIPPET_KEY . '.{uid}', [$snippetService, 'handleChangedSnippet'])
+		$projectConfigService->onAdd(SnippetsService::CONFIG_SNIPPET_KEY . '.{uid}', [$snippetService, 'handleChangedSnippet'])
 			->onUpdate(SnippetsService::CONFIG_SNIPPET_KEY . '.{uid}', [$snippetService, 'handleChangedSnippet'])
 			->onRemove(SnippetsService::CONFIG_SNIPPET_KEY . '.{uid}', [$snippetService, 'handleDeleteSnippet']);
 
-		$snippetService->onAdd(SnippetsService::CONFIG_SNIPPET_GROUP_KEY . '.{uid}', [$snippetService, 'handleChangedSnippetGroup'])
+		$projectConfigService->onAdd(SnippetsService::CONFIG_SNIPPET_GROUP_KEY . '.{uid}', [$snippetService, 'handleChangedSnippetGroup'])
 			->onUpdate(SnippetsService::CONFIG_SNIPPET_GROUP_KEY . '.{uid}', [$snippetService, 'handleChangedSnippetGroup'])
 			->onRemove(SnippetsService::CONFIG_SNIPPET_GROUP_KEY . '.{uid}', [$snippetService, 'handleDeleteSnippetGroup']);
 
