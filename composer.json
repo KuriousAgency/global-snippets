@@ -1,38 +1,36 @@
 {
-	"name": "kuriousagency/global-snippets",
-	"description": "Previous hardcoded template snippets",
-	"type": "craft-plugin",
-	"version": "1.0.0",
-	"keywords": [
-		"craft",
-		"cms",
-		"craftcms",
-		"craft-plugin",
-		"global snippets"
-	],
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "Kurious Agency",
-			"homepage": "https://kurious.agency"
-		}
-	],
-	"require": {
-		"craftcms/cms": "^3.0.0-RC1"
-	},
-	"autoload": {
-		"psr-4": {
-			"kuriousagency\\globalsnippets\\": "src/"
-		}
-	},
-	"extra": {
-		"name": "Global Snippets",
-		"handle": "global-snippets",
-		"hasCpSettings": false,
-		"hasCpSection": true,
-		"components": {
-			"snippets": "kuriousagency\\globalsnippets\\services\\Snippets"
-		},
-		"class": "kuriousagency\\globalsnippets\\GlobalSnippets"
-	}
+    "name": "kuriousagency/global-snippets",
+    "description": "Previous hardcoded template snippets",
+    "type": "craft-plugin",
+    "version": "1.0.1",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "global snippets"
+    ],
+    "license": "MIT",
+    "authors": [{
+        "name": "Kurious Agency",
+        "homepage": "https://kurious.agency"
+    }],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+            "kuriousagency\\globalsnippets\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Global Snippets",
+        "handle": "global-snippets",
+        "hasCpSettings": false,
+        "hasCpSection": true,
+        "components": {
+            "snippets": "kuriousagency\\globalsnippets\\services\\Snippets"
+        },
+        "class": "kuriousagency\\globalsnippets\\GlobalSnippets"
+    }
 }

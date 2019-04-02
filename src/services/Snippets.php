@@ -10,7 +10,7 @@
 
 namespace kuriousagency\globalsnippets\services;
 
-use kuriousagency\globalsnippets\GlobalSnippets;
+// use kuriousagency\globalsnippets\GlobalSnippets;
 use kuriousagency\globalsnippets\models\Snippet;
 use kuriousagency\globalsnippets\models\SnippetGroup;
 use kuriousagency\globalsnippets\records\Snippets as SnippetRecord;
@@ -20,7 +20,6 @@ use kuriousagency\globalsnippets\records\SnippetGroup as SnippetGroupRecord;
 use Craft;
 use craft\base\Component;
 use craft\db\Query;
-use craft\db\Command;
 use yii\base\Exception;
 use craft\events\ConfigEvent;
 use craft\helpers\Db;
@@ -43,7 +42,7 @@ class Snippets extends Component
      *
      * @param int $id
      */
-    public function getSnippetById($id)
+    public function getSnippetById(int $id)
     {
         $result = $this->_createSnippetQuery()
             ->where(['id' => $id])
@@ -56,7 +55,7 @@ class Snippets extends Component
      *
      * @param int $id
      */
-    public function getSnippetByHandle($handle)
+    public function getSnippetByHandle(string $handle)
     {
         $result = $this->_createSnippetQuery()
             ->where(['handle' => $handle])
@@ -80,13 +79,13 @@ class Snippets extends Component
         return $snippets;
     }
     /**
-     * Get snippets by group.
+     * Get snippets by group Id.
      *
      */
-    public function getSnippetsByGroup($groupId): array
+    public function getSnippetsByGroup(int $groupId): array
     {
         $rows = $this->_createSnippetQuery()
-            ->where(['snippetGroup' => $groupId])
+            ->where(['snippetGroupId' => $groupId])
             ->all();
 
         $snippets = [];
@@ -102,28 +101,32 @@ class Snippets extends Component
      */
     public function getAllSnippetGroups(): array
     {
-        $query = (new Query())
-            ->select([
-                'groups.id',
-                'groups.name',
-                'groups.handle',
-            ])
-            ->orderBy('name')
-            ->from(['{{%globalsnippets_groups}} groups'])
+        $query = $this->_createGroupQuery()
             ->all();
-
         $groups = [];
         foreach ($query as $row) {
-            $groups[$row['id']] = array(
-                'id' => $row['id'],
-                'name' => $row['name'],
-                'handle' => $row['handle']
-            );
+            $groups[$row['id']] = new SnippetGroup($row);
         }
-        // Craft::dd($groups);
         return $groups;
     }
+    
+    /**
+     * Get Snippet Group Model from handle.
+     * @param string
+     * @return SnippetGroup
+     */
+    public function getSnippetGroup(string $handle)
+    {
+        $query = $this->_createGroupQuery()
+        ->where(['handle'=>$handle])
+        ->one();
 
+        return $query ? new SnippetGroup($query) : null;
+    }
+
+    /**
+     * Save a new or rename existing Snippet Group
+     */
     public function saveSnippetGroup(SnippetGroup $model)
     {
         $isNewGroup = !$model->id;
@@ -131,11 +134,15 @@ class Snippets extends Component
             $record = SnippetGroupRecord::findOne($model->id);
 
             if (!$record) {
-                throw new Exception(Craft::t('commerce', 'No snippet exists with the ID “{id}”', ['id' => $model->id]));
+                throw new Exception(Craft::t('global-snippets', 'No group exists with the ID “{id}”', ['id' => $model->id]));
             }
         } else {
             $record = new SnippetGroupRecord();
+            if ($this->getSnippetGroup($model->handle)){
+                return Craft::t('global-snippets', 'A snippet already exists with the handle: “{handle}”', ['handle' => $model->handle]);
+            }
         }
+        
         $record->name = $model->name;
         $record->handle = $model->handle;
         $record->save(false);
@@ -162,24 +169,24 @@ class Snippets extends Component
      * @return bool
      * @throws \Exception
      */
-    public function saveSnippet(Snippet $model, bool $runValidation = true): bool
+    public function saveSnippet(Snippet $model, bool $runValidation = true)
     {
         if ($model->id) {
             $record = SnippetRecord::findOne($model->id);
-
             if (!$record) {
-                throw new Exception(Craft::t('commerce', 'No snippet exists with the ID “{id}”', ['id' => $model->id]));
+                throw new Exception(Craft::t('global-snippets', 'No snippet exists with the ID “{id}”', ['id' => $model->id]));
             }
         } else {
             $record = new SnippetRecord();
+            if ($this->getSnippetByHandle($model->handle)){
+                return Craft::t('global-snippets', 'A snippet already exists with the handle: “{handle}”', ['handle' => $model->handle]);
+            }
         }
-
         $record->name = $model->name;
-        $record->snippetGroup = $model->snippetGroup;
+        $record->snippetGroupId = $model->snippetGroupId;
         $record->content = $model->content;
         $record->handle = $model->handle;
         $record->instruction = $model->instruction;
-
         $record->save(false);
 
         // Now that we have a record ID, save it on the model
@@ -199,6 +206,10 @@ class Snippets extends Component
         return true;
     }
 
+    /**
+     * Delete a snippet by Id
+     * 
+     */
     public function deleteSnippetById($id)
     {
         $snippet = SnippetRecord::findOne($id);
@@ -210,17 +221,10 @@ class Snippets extends Component
 
         return false;
     }
-    public function deleteSnippetsByGroup($groupId)
-    {
-        $snippets = $this->getSnippetsByGroup($groupId);
-        foreach ($snippets as $model){
-            if ($model){
-                $record = SnippetRecord::findOne($model->id);
-                $record->delete();
-            }
-        }
-    }
-
+    
+    /**
+     * Deletes a snippet group and all associated snippets
+     */
     public function deleteSnippetGroupById($id)
     {
         $group = SnippetGroupRecord::findOne($id);
@@ -228,6 +232,16 @@ class Snippets extends Component
 			Craft::$app->getProjectConfig()->remove(self::CONFIG_SNIPPET_GROUP_KEY . '.' . $group->uid);
             //$this->deleteSnippetsByGroup($id);
             return true;//$group->delete();
+            //Delete all the snippets in the group
+            /*$snippets = $this->getSnippetsByGroup($id);
+            foreach ($snippets as $model){
+                if ($model){
+                    $record = SnippetRecord::findOne($model->id);
+                    $record->delete();
+                }
+            }
+            //Delete the group itself
+            return $group->delete();*/
         }
         return false;
 	}
@@ -335,7 +349,7 @@ class Snippets extends Component
     // =========================================================================
 
     /**
-     * Returns a Query object prepped for retrieving Emails.
+     * Returns a Query object prepped for retrieving Snippets.
      *
      * @return Query
      */
@@ -347,12 +361,30 @@ class Snippets extends Component
                 'snippets.name',
                 'snippets.content',
                 'snippets.handle',
-                'snippets.snippetGroup',
+                'snippets.snippetGroupId',
                 'snippets.instruction',
             ])
             ->orderBy('name')
             ->from(['{{%globalsnippets_snippets}} snippets']);
     }
+
+    /**
+     * Returns a Query object prepped for retrieving Snippet Groups.
+     *
+     * @return Query
+     */
+    private function _createGroupQuery(): Query
+    {
+        return (new Query())
+            ->select([
+                'groups.id',
+                'groups.name',
+                'groups.handle',
+            ])
+            ->orderBy('name')
+            ->from(['{{%globalsnippets_groups}} groups']);
+    }
+
 
     /**
      * Gets a snippet group record or creates a new one.
@@ -366,7 +398,7 @@ class Snippets extends Component
             $groupRecord = SnippetGroupRecord::findOne($group->id);
 
             if (!$groupRecord) {
-                // throw new Exception("No field group exists with the ID '{$group->id}'");
+                throw new Exception("No field group exists with the ID '{$group->id}'");
             }
         } else {
             $groupRecord = new SnippetGroupRecord();

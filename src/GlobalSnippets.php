@@ -17,7 +17,6 @@ use Craft;
 use craft\base\Plugin;
 use craft\services\Plugins;
 use craft\events\PluginEvent;
-use craft\elements\GlobalSet;
 use craft\web\UrlManager;
 use craft\web\twig\variables\CraftVariable;
 use craft\events\RegisterUrlRulesEvent;
@@ -75,9 +74,9 @@ class GlobalSnippets extends Plugin
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
                 $event->rules['global-snippets'] = 'global-snippets/snippets/index';
-                $event->rules['global-snippets/<snippetGroup:\d+>'] = 'global-snippets/snippets/index';
+                $event->rules['global-snippets/<snippetGroupId:\d+>'] = 'global-snippets/snippets/index';
                 $event->rules['global-snippets/settings'] = 'global-snippets/snippets/settings';
-                $event->rules['global-snippets/settings/<snippetGroup:\d+>'] = 'global-snippets/snippets/settings';
+                $event->rules['global-snippets/settings/<snippetGroupId:\d+>'] = 'global-snippets/snippets/settings';
                 $event->rules['global-snippets/settings/snippet/<id:\d+>'] = 'global-snippets/snippets/edit';
                 $event->rules['global-snippets/settings/snippet/new'] = 'global-snippets/snippets/edit';
             }

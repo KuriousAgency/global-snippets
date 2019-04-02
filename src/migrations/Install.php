@@ -86,10 +86,9 @@ class Install extends Migration
                     'dateUpdated' => $this->dateTime()->notNull(),
                     'uid' => $this->uid(),
                     'siteId' => $this->integer()->notNull()->defaultValue(Craft::$app->sites->currentSite->id),
-                    // Custom columns in table
                     'name' => $this->string(255)->notNull()->defaultValue(''),
                     'handle' => $this->string(255)->notNull()->defaultValue(''),
-                    'snippetGroup' => $this->integer()->notNull()->defaultValue(1),
+                    'snippetGroupId' => $this->integer()->notNull()->defaultValue(1),
                     'instruction' => $this->string(255)->notNull()->defaultValue(''),
                     'content' => $this->longText()->notNull()->defaultValue(''),
                 ]
@@ -102,16 +101,11 @@ class Install extends Migration
                     'dateUpdated' => $this->dateTime()->notNull(),
                     'uid' => $this->uid(),
                     'siteId' => $this->integer()->notNull()->defaultValue(Craft::$app->sites->currentSite->id),
-                    // Custom columns in table
                     'name' => $this->string(255)->notNull()->defaultValue(''),
                     'handle' => $this->string(255)->notNull()->defaultValue(''),
-                    // 'snippetGroup' => $this->enum('group',['account','checkout','other'])->notNull(),
-                    // 'instruction' => $this->string(255)->notNull()->defaultValue(''),
-                    // 'content' => $this->longText()->notNull()->defaultValue(''),
                 ]
             );
         }
-
         return $tablesCreated;
     }
 
@@ -120,26 +114,8 @@ class Install extends Migration
      */
     protected function createIndexes()
     {
-        $this->createIndex(
-            $this->db->getIndexName(
-                '{{%globalsnippets_snippets}}',
-                'handle',
-                true
-            ),
-            '{{%globalsnippets_snippets}}',
-            'handle',
-            true
-        );
-        $this->createIndex(
-            $this->db->getIndexName(
-                '{{%globalsnippets_groups}}',
-                'handle',
-                true
-            ),
-            '{{%globalsnippets_groups}}',
-            'handle',
-            true
-        );
+        $this->createIndex($this->db->getIndexName('{{%globalsnippets_snippets}}','handle',true),'{{%globalsnippets_snippets}}','handle',true);
+        $this->createIndex($this->db->getIndexName('{{%globalsnippets_groups}}','handle',true),'{{%globalsnippets_groups}}','handle',true);
         // Additional commands depending on the db driver
         switch ($this->driver) {
             case DbConfig::DRIVER_MYSQL:
@@ -154,29 +130,13 @@ class Install extends Migration
      */
     protected function addForeignKeys()
     {
-        $this->addForeignKey(
-            $this->db->getForeignKeyName('{{%globalsnippets_snippets}}', 'siteId'),
-            '{{%globalsnippets_snippets}}',
-            'siteId',
-            '{{%sites}}',
-            'id',
-            'CASCADE',
-            'CASCADE'
-        );
-        $this->addForeignKey(
-            $this->db->getForeignKeyName('{{%globalsnippets_groups}}', 'siteId'),
-            '{{%globalsnippets_groups}}',
-            'siteId',
-            '{{%sites}}',
-            'id',
-            'CASCADE',
-            'CASCADE'
-        );
-
-        $this->addForeignKey(null, '{{%globalsnippets_snippets}}', ['snippetGroup'], '{{%globalsnippets_groups}}', ['id'], 'CASCADE', null);
+        $this->addForeignKey($this->db->getForeignKeyName('{{%globalsnippets_snippets}}', 'siteId'),'{{%globalsnippets_snippets}}','siteId','{{%sites}}','id','CASCADE','CASCADE');
+        $this->addForeignKey($this->db->getForeignKeyName('{{%globalsnippets_groups}}', 'siteId'),'{{%globalsnippets_groups}}','siteId','{{%sites}}','id','CASCADE','CASCADE');
+        $this->addForeignKey(null, '{{%globalsnippets_snippets}}', ['snippetGroupId'], '{{%globalsnippets_groups}}', ['id'], 'CASCADE', null);
     }
 
     /**
+     * CAN BE REMOVED WHEN APPROVED
      * @return void
      */
     protected function insertDefaultData()
@@ -184,19 +144,19 @@ class Install extends Migration
         $snippets = [
             ['name' => 'Sign In Text',
                     'handle' => 'signInText',
-                    'snippetGroup' => 1,
+                    'snippetGroupId' => 1,
                     'instruction' => 'This message is displayed on log in screens',
                     'content' => 'Please sign in to access your account.',
             ],
             ['name' => 'Registration',
                     'handle' => 'registration',
-                    'snippetGroup' => 1,
+                    'snippetGroupId' => 1,
                     'instruction' => 'This message is displayed on sign up screens',
                     'content' => 'Create an account with us to be able to view your order history, track orders and store details to be able to quickly pass through the checkout in future.',
             ],
             ['name' => 'Checkout Registration',
                     'handle' => 'checkoutRegistration',
-                    'snippetGroup' => 1,
+                    'snippetGroupId' => 1,
                     'instruction' => 'This message is displayed on when people create an account on checkout',
                     'content' => 'If you already have an account you can login now, if not it\'s simple to create one for the future.',
             ],
@@ -226,7 +186,7 @@ class Install extends Migration
                 'dateUpdated' => $todayDateTime,
                 'name' => $snippet['name'],
                 'handle' => $snippet['handle'],
-                'snippetGroup' => $snippet['snippetGroup'],
+                'snippetGroupId' => $snippet['snippetGroupId'],
                 'instruction' => $snippet['instruction'],
                 'content' => $snippet['content'],
             ];
