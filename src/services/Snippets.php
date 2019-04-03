@@ -13,7 +13,7 @@ namespace kuriousagency\globalsnippets\services;
 // use kuriousagency\globalsnippets\GlobalSnippets;
 use kuriousagency\globalsnippets\elements\Snippet;
 use kuriousagency\globalsnippets\models\SnippetGroup;
-use kuriousagency\globalsnippets\records\Snippets as SnippetRecord;
+use kuriousagency\globalsnippets\records\Snippet as SnippetRecord;
 use kuriousagency\globalsnippets\records\SnippetGroup as SnippetGroupRecord;
 
 
@@ -31,7 +31,7 @@ use craft\helpers\Db;
  */
 class Snippets extends Component
 {
-	const CONFIG_SNIPPET_KEY = 'snippets.snippet';
+	
 	const CONFIG_SNIPPET_GROUP_KEY = 'snippets.group';
 
     // Public Methods
@@ -185,8 +185,7 @@ class Snippets extends Component
      *       return true;
      *   }
      */
-<<<<<<< HEAD
-    public function saveSnippet(Snippet $model, bool $runValidation = true)
+    /*public function saveSnippet(Snippet $model, bool $runValidation = true)
     {
         if ($model->id) {
             $record = SnippetRecord::findOne($model->id);
@@ -221,9 +220,7 @@ class Snippets extends Component
 		$projectConfig->set($configPath, $configData);
 
         return true;
-    }
-=======
->>>>>>> 3716d65289973815e1eb7b2de08f4ae4d8d808bc
+    }*/
 
     /**
      * Delete a snippet by Id
@@ -234,13 +231,10 @@ class Snippets extends Component
         $snippet = Snippet::findOne($id);
 
         if ($snippet) {
-<<<<<<< HEAD
-			Craft::$app->getProjectConfig()->remove(self::CONFIG_SNIPPET_KEY . '.' . $snippet->uid);
+			Craft::$app->getProjectConfig()->remove(Snippet::CONFIG_SNIPPET_KEY . '.' . $snippet->uid);
             return true;//$snippet->delete();
-=======
-            Craft::$app->getElements()->deleteElement($snippet);
-            return true;
->>>>>>> 3716d65289973815e1eb7b2de08f4ae4d8d808bc
+            //Craft::$app->getElements()->deleteElement($snippet);
+            //return true;
         }
 
         return false;
@@ -279,16 +273,39 @@ class Snippets extends Component
 
 		$transaction = Craft::$app->getDb()->beginTransaction();
 		try {
-			$record = $this->_getSnippetRecord($uid);
+			//$record = $this->_getSnippetRecord($uid);
+			//$id = $record->id;
+			//Craft::dd($uid);
+			$record = SnippetRecord::findOne(['uid' => $uid]);
+			//Craft::dd($record);
 
-			$record->name = $data['name'];
-        	$record->snippetGroup = $data['snippetGroup'];
-        	$record->content = $data['content'];
-        	$record->handle = $data['handle'];
-			$record->instruction = $data['instruction'];
-			$record->uid = $uid;
+			if (!$record) {
+				$record = new SnippetRecord();
+				$record->name = $data['name'];
+				$record->handle = $data['handle'];
+				$record->instruction = $data['instruction'];
+				$record->snippetGroupId = $data['snippetGroupId'];
 
-			$record->save(false);
+				$snippet = new Snippet($record);
+				$snippet->pcuid = $uid;
+				Craft::$app->getElements()->saveElement($snippet);
+			} else {
+
+				$record->name = $data['name'];
+				$record->handle = $data['handle'];
+				$record->instruction = $data['instruction'];
+				$record->snippetGroupId = $data['snippetGroupId'];
+				$record->uid = $uid;
+				$record->save(false);
+			}
+			
+			//Craft::dd($snippet);
+
+			
+
+			//Craft::$app->getElements()->saveElement($snippet);
+
+			//$record->save(false);
 			$transaction->commit();
 
 		} catch (\Throwable $e) {
@@ -300,17 +317,20 @@ class Snippets extends Component
 	public function handleDeleteSnippet(ConfigEvent $event)
 	{
 		$uid = $event->tokenMatches[0];
-		$record = $this->_getSnippetRecord($uid);
+		$record = SnippetRecord::findOne(['uid' => $uid]);
 
-		if (!$record->id) {
+		if (!$record) {
 			return;
 		}
+
+		$snippet = new Snippet($record);
+		//Craft::dd($snippet);
 
 		$db = Craft::$app->getDb();
 		$transaction = $db->beginTransaction();
 
 		try {
-			$record->delete();
+			Craft::$app->getElements()->deleteElement($snippet);
 			$transaction->commit();
 
 		} catch (\Throwable $e) {
@@ -354,7 +374,7 @@ class Snippets extends Component
 		$transaction = $db->beginTransaction();
 		
 		try {
-			$snippets = SnippetRecord::find(['snippetGroup' => $record->handle])->limit(null)->all();
+			$snippets = SnippetRecord::findAll(['snippetGroupId' => $record->id]);
 			foreach ($snippets as $snippet)
 			{
 				$this->deleteSnippetById($snippet->id);
@@ -436,7 +456,7 @@ class Snippets extends Component
 		return SnippetRecord::findOne(['uid' => $uid]) ?? new SnippetRecord();
 	}
 
-	private function _getSnippetGroupRecord(string $uid): SnippetRecord
+	private function _getSnippetGroupRecord(string $uid): SnippetGroupRecord
 	{
 		return SnippetGroupRecord::findOne(['uid' => $uid]) ?? new SnippetGroupRecord();
 	}

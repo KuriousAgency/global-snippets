@@ -20,6 +20,7 @@ use craft\base\Element;
 use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\UrlHelper;
+use craft\helpers\Json;
 
 /**
  * @author    Kurious Agency
@@ -28,6 +29,8 @@ use craft\helpers\UrlHelper;
  */
 class Snippet extends Element
 {
+	const CONFIG_SNIPPET_KEY = 'snippets.snippet';
+
     // Public Properties
     // =========================================================================
 
@@ -38,7 +41,8 @@ class Snippet extends Element
     public $name = '';
     public $handle = '';
     public $snippetGroupId;
-    public $instruction = '';
+	public $instruction = '';
+	public $pcuid;
 
     // Static Methods
     // =========================================================================
@@ -194,7 +198,7 @@ class Snippet extends Element
      */
     public function afterSave(bool $isNew)
     {
-        if (!$isNew) {
+		if (!$isNew) {
             $record = SnippetRecord::findOne($this->id);
             if (!$record) {
                 throw new Exception('Invalid Snippet ID: ' . $this->id);
@@ -202,13 +206,30 @@ class Snippet extends Element
         } else {
             $record = new SnippetRecord();
             $record->id = $this->id;
-        }
+		}
+		//Craft::dd($this->pcuid);
         $record->name = $this->name;
         $record->handle = $this->handle;
         $record->instruction = $this->instruction;
-        $record->snippetGroupId = $this->snippetGroupId;
+		$record->snippetGroupId = $this->snippetGroupId;
+		$record->uid = $this->pcuid;
         $record->save(false);
-        $this->id = $record->id;
+		$this->id = $record->id;
+		//Craft::dd($record->uid);
+
+		$projectConfig = Craft::$app->getProjectConfig();
+		$configData = [
+			'name' => $record->name,
+			'handle' => $record->handle,
+			'instruction' => $record->instruction,
+			'snippetGroupId' => $record->snippetGroupId,
+		];
+		$configPath = self::CONFIG_SNIPPET_KEY . '.' . $record->uid;
+		$currentConfig = $projectConfig->get($configPath);
+		if (Json::encode($currentConfig) != Json::encode($configData)) {
+			$projectConfig->set($configPath, $configData);
+		}
+
         return parent::afterSave($isNew);
     }
 

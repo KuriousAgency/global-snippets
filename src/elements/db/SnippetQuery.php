@@ -9,7 +9,8 @@ class SnippetQuery extends ElementQuery
     public $name;
     public $handle;
     public $snippetGroupId;
-    public $instruction;
+	public $instruction;
+	public $uid;
 
     public function name($value)
     {
@@ -37,6 +38,13 @@ class SnippetQuery extends ElementQuery
         $this->instruction = $value;
 
         return $this;
+	}
+	
+	public function uid($value)
+    {
+        $this->uid = $value;
+
+        return $this;
     }
 
     protected function beforePrepare(): bool
@@ -49,7 +57,8 @@ class SnippetQuery extends ElementQuery
             'globalsnippets_snippets.name',
             'globalsnippets_snippets.handle',
             'globalsnippets_snippets.snippetGroupId',
-            'globalsnippets_snippets.instruction'    
+			'globalsnippets_snippets.instruction',
+			'globalsnippets_snippets.uid',
         ]);
 
         if ($this->name) {
@@ -63,6 +72,9 @@ class SnippetQuery extends ElementQuery
         }
         if ($this->instruction) {
             $this->subQuery->andWhere(Db::parseParam('globalsnippets_snippets.instruction', $this->instruction));
+		}
+		if ($this->uid) {
+            $this->subQuery->andWhere(Db::parseParam('globalsnippets_snippets.uid', $this->uid));
         }
         return parent::beforePrepare();
     }
