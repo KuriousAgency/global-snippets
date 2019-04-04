@@ -212,7 +212,7 @@ class Snippet extends Element
         $record->handle = $this->handle;
         $record->instruction = $this->instruction;
 		$record->snippetGroupId = $this->snippetGroupId;
-		$record->uid = $this->pcuid;
+		$record->uid = $this->pcuid ?? $this->uid;
         $record->save(false);
 		$this->id = $record->id;
 		//Craft::dd($record->uid);
